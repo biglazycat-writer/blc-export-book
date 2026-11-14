@@ -1,0 +1,406 @@
+[
+  {
+    "path": "README.md",
+    "action": "modified"
+  },
+  {
+    "path": "app_localmodels.go",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/bindings/biglazycat-desktop/app.ts",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/bindings/biglazycat-desktop/internal/models/models.ts",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/bindings/biglazycat-desktop/models.ts",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/package-lock.json",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/package.json",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/pnpm-lock.yaml",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/scripts/check-global-toolbar.mjs",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/App.tsx",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/PageWindow.tsx",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/bridge/desktop-api.ts",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/features/image-designer/ImageCanvas.tsx",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/image-designer/ImageDesigner.test.tsx",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/image-designer/ImageDesigner.tsx",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/image-designer/design.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/image-designer/image-designer.css",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/image-designer/render-image.test.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/image-designer/render-image.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/NovelsPage.root-menu.test.tsx",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/features/novels/NovelsPage.tsx",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/WorkExportFormatCards.tsx",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/WorkExportScopePicker.tsx",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/assets.test.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/assets.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/cover.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/docx-book.test.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/docx-book.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/docx-toc.test.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/epub-book.test.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/epub-book.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/epub-package.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/epub-xhtml.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/file-name.test.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/file-name.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/html-book.test.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/html-book.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/manual-indent.test.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/manuscript.test.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/manuscript.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/page-band.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/pdf-book.test.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/pdf-book.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/presets.test.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/presets.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/progress.test.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/progress.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/run-export.test.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/run-export.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/scope-tree.test.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/scope-tree.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/settings.test.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/settings.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/types.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/typst-layout.test.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/typst-runtime.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/typst-source.test.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/typst-source.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/novels/work-export/work-export.css",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/pdf-reader/edit/font-subset.ts",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/features/pdf-reader/edit/pdfium.worker.ts",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/features/settings/LocalModelsPanel.test.tsx",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/features/typeset/TypesetPage.test.tsx",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/typeset/TypesetPage.tsx",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/typeset/TypesetPreview.tsx",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/typeset/TypesetSettings.tsx",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/typeset/preview-geometry.test.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/typeset/preview-geometry.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/typeset/preview-settings.test.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/typeset/preview-settings.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/typeset/typeset.css",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/features/writing/EditorContextMenu.tsx",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/features/writing/EditorToolbar.test.tsx",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/features/writing/EditorToolbar.tsx",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/features/writing/NovelEditor.tsx",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/i18n/locales/en-US/app.json",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/i18n/locales/en-US/novels.json",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/i18n/locales/en-US/settings.json",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/i18n/locales/en-US/writing.json",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/i18n/locales/zh-CN/app.json",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/i18n/locales/zh-CN/novels.json",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/i18n/locales/zh-CN/settings.json",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/i18n/locales/zh-CN/writing.json",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/lib/app-navigation.ts",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/lib/embedded-resource-export.test.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/lib/embedded-resource-export.tsx",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/lib/export-utils.ts",
+    "action": "deleted"
+  },
+  {
+    "path": "frontend/src/lib/local-models.ts",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/lib/workspace-tabs.test.tsx",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/types/models.ts",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/vite.config.ts",
+    "action": "modified"
+  },
+  {
+    "path": "internal/localmodels/catalog.json",
+    "action": "modified"
+  },
+  {
+    "path": "internal/localmodels/download_test.go",
+    "action": "modified"
+  },
+  {
+    "path": "internal/localmodels/localmodels.go",
+    "action": "modified"
+  },
+  {
+    "path": "internal/localmodels/localmodels_test.go",
+    "action": "modified"
+  },
+  {
+    "path": "internal/localmodels/sfnt.go",
+    "action": "deleted"
+  },
+  {
+    "path": "internal/localmodels/sfnt_test.go",
+    "action": "deleted"
+  },
+  {
+    "path": "internal/models/models.go",
+    "action": "modified"
+  },
+  {
+    "path": "wails_obfuscated.gen.go",
+    "action": "modified"
+  },
+  {
+    "path": "work_export.go",
+    "action": "deleted"
+  },
+  {
+    "path": "work_export_test.go",
+    "action": "deleted"
+  }
+]

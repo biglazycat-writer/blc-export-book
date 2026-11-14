@@ -1,0 +1,12 @@
+import JSZip from 'jszip';
+export const canvasId='canvas-export-fixture',mindMapId='mindmap-export-fixture';
+const element=(id,type,x,y,width,height,props,extra={})=>({id,canvas_id:canvasId,component_type:type,component_version:1,transform:{x,y,scale_x:1,scale_y:1,rotation:0},bounds:{width,height},layer_id:'layer',z_order:id,visibility:{mode:'visible'},lock:'none',props,revision:1,...extra});
+export const canvasFile={schema:'biglazycat/canvas',schema_version:1,id:canvasId,title:'导出画布',revision:1,created_at:'',updated_at:'',scene:{schema_version:1,revision:1,settings:{background:'#ffffff',grid:{size:20,color:'#eeeeee',visible:false},snap_to_grid:false,hand_drawn:true},layers:[{id:'layer',canvas_id:canvasId,name:'内容',order_key:'a',visible:true,locked:false,revision:1}],elements:[
+  element('a','core.shape',0,0,220,120,{shape:'roundedRectangle',fill:'#e0e9f5',stroke:'#496ba6',label:'原始画布 {{icon:check:#27864b}}',labelFontSize:24}),
+  element('b','core.shape',430,50,220,120,{shape:'diamond',fill:'#ffe4cc',stroke:'#ab6c39',label:'保留连线',labelFontSize:22}),
+  element('c','core.text',40,210,560,80,{content:'中文、形状、手绘与连接标签',format:'rich-text',fontSize:25}),
+  element('hidden','core.shape',800,800,200,120,{shape:'rectangle',fill:'#000000',stroke:'#000000',label:'不可见内容'},{visibility:{mode:'hidden'}}),
+],connectors:[{id:'link',canvas_id:canvasId,source:{kind:'element',element_id:'a',anchor_id:'right'},target:{kind:'element',element_id:'b',anchor_id:'left'},routing:'bezier',style:{label:'有向关系',color:'#496ba6',endMarker:'arrow',width:2},revision:1}],interactions:[]}};
+export const snapshot={schema:'1.0',title:'导出导图',nodes:[{id:'root',type:'mindmap',position:{x:0,y:0},data:{label:'离线思维导图',lingbiIcon:'star'}},{id:'one',type:'mindmap',position:{x:0,y:0},data:{label:'保留公式',formulaLatex:'E=mc^2'}},{id:'two',type:'mindmap',position:{x:0,y:0},data:{label:'主题与彩虹线'}}],edges:[{id:'a',source:'root',target:'one'},{id:'b',source:'root',target:'two'}],view:{structure:'logicalStructure',rainbow:{open:true,presetId:'classic'},baseStyle:{fontFamily:'LXGW WenKai'}}};
+export async function mindMapArchive(){const zip=new JSZip();zip.file('biglazycat.json',JSON.stringify(snapshot));zip.file('biglazycat-metadata.json',JSON.stringify({id:mindMapId,revision:2}));return zip.generateAsync({type:'uint8array'});}
+export const embeddedMarkdown=`\n\n<!-- blc:node ${JSON.stringify({type:'flowCanvas',attrs:{flowCanvasId:canvasId,title:'原始画布'}})} -->\n\n<!-- blc:node ${JSON.stringify({type:'mindMapEmbed',attrs:{artifactId:mindMapId,title:'原始导图'}})} -->\n`;

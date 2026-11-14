@@ -1,0 +1,51 @@
+.structuredCanvasPreviewViewport {
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 24px;
+  background: var(--editor-page-bg, var(--bg-base, #f6f7fb));
+}
+
+.structuredCanvasPreviewScene {
+  position: relative;
+  flex: 0 0 auto;
+  overflow: visible;
+  background: var(--editor-page-bg, var(--bg-base, #f6f7fb));
+}
+
+.structuredCanvasPreviewContent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: top left;
+  background: var(--editor-page-bg, var(--bg-base, #f6f7fb));
+}
+
+.structuredCanvasPreviewElement {
+  position: absolute;
+  z-index: 1;
+  transform-origin: center center;
+  pointer-events: none;
+}
+
+.structuredCanvasPreviewElement > * {
+  width: 100%;
+  height: 100%;
+}
+
+.structuredCanvasPreviewConnectors {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: visible;
+}
+
+.structuredCanvasPreviewConnectors line {
+  stroke: #94a3b8;
+  stroke-width: 1.5;
+}
+
+.flowCanvasEmptyPreview small { color: var(--text-muted, #7a8498); }

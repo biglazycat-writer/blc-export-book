@@ -1,36 +1,72 @@
 {
-  "name": "blc-plugin-template",
+  "name": "blc-export-book",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "大懒猫创作平台插件模板工程",
+  "description": "大懒猫创作平台排版导出插件",
   "engines": {
-    "node": ">=22.23.3 <23.0.0"
+    "node": ">=22.23.3 <23.0.0",
+    "biglazycat": ">=0.4.5"
   },
   "scripts": {
     "typecheck": "tsc --noEmit && tsc -p tsconfig.node.json --noEmit",
-    "build": "tsc -p tsconfig.node.json && vite build",
-    "test": "node --test tests/*.test.mjs",
-    "package": "node scripts/package.mjs"
-  },
-  "dependencies": {
-    "blc-plugin-sdk": "1.1.0"
+    "build": "npm run typecheck && node scripts/build.mjs && vite build",
+    "test": "node --test tests/*.test.mjs && vitest run",
+    "package": "node scripts/package.mjs",
+    "dev": "vite --host 127.0.0.1",
+    "check:browser": "node scripts/check-browser.mjs"
   },
   "devDependencies": {
-    "@types/node": "22.19.0",
+    "@expo-google-fonts/noto-emoji": "0.4.8",
+    "@expo-google-fonts/noto-sans-mono": "0.4.2",
+    "@expo-google-fonts/noto-serif-sc": "0.4.4",
+    "@iconify-json/tabler": "1.2.42",
+    "@myriaddreamin/typst-ts-web-compiler": "0.7.0",
+    "@myriaddreamin/typst.ts": "0.7.0",
+    "@testing-library/dom": "10.4.1",
+    "@testing-library/react": "16.3.0",
+    "@testing-library/user-event": "14.6.1",
+    "@types/katex": "0.16.8",
+    "@types/node": "25.9.5",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "@xyflow/react": "12.11.2",
+    "blc-plugin-sdk": "file:vendor/blc-plugin-sdk",
+    "docx": "9.7.1",
+    "esbuild": "0.28.1",
+    "html-to-image": "1.11.13",
+    "i18next": "26.5.7",
+    "jsdom": "29.1.1",
+    "jszip": "3.10.2",
+    "katex": "0.16.47",
+    "lowlight": "3.3.0",
+    "lucide-react": "0.511.0",
+    "mermaid": "12.0.0",
+    "modern-screenshot": "4.7.0",
+    "pdf-lib": "1.17.1",
+    "pdfjs-dist": "6.2.108",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-i18next": "17.1.5",
+    "roughjs": "4.6.6",
+    "simple-mind-map": "0.14.0-fix.3",
     "typescript": "5.9.3",
-    "vite": "7.3.8"
+    "vite": "7.3.6",
+    "vitest": "4.1.10"
   },
   "files": [
     "dist",
     "package-lock.json",
     "README.md",
-    "README.en.md"
+    "README.en.md",
+    "vendor",
+    "docs"
   ],
   "biglazycat": {
     "apiVersion": 1,
-    "displayName": "插件模板 · Hello World",
-    "description": "最小可运行示例：后台命令、浏览器视图、状态保存与测试。基于此模板开始开发你的插件。",
+    "minimumApiRevision": 3,
+    "displayName": "排版导出",
+    "description": "单篇导出 PDF、Word、HTML、PNG，制作 EPUB、PDF、Word 书籍。内置离线排版引擎与字体。",
     "main": "dist/main.js",
     "mainView": "main",
     "platforms": [
@@ -44,51 +80,79 @@
     "contributes": {
       "commands": [
         {
-          "id": "template.hello",
-          "title": "打招呼",
-          "description": "返回一条问候消息，演示命令参数、进度与取消。",
-          "aiCallable": true,
-          "externalEffect": false,
-          "inputSchema": {
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": "string",
-                "description": "要问候的对象"
-              }
-            }
-          }
+          "id": "resource.read",
+          "title": "resource.read",
+          "visibility": "internal",
+          "aiCallable": false,
+          "externalEffect": false
         },
         {
-          "id": "template.status",
-          "title": "查看插件状态",
+          "id": "export.article",
+          "title": "排版导出当前文章",
+          "contexts": [
+            "editor.document"
+          ],
           "aiCallable": true,
           "externalEffect": false
         },
         {
-          "id": "template.open",
-          "title": "打开模板页面",
+          "id": "export.book",
+          "title": "制作书籍",
           "aiCallable": true,
           "externalEffect": false
+        },
+        {
+          "id": "save.begin",
+          "title": "save.begin",
+          "visibility": "internal",
+          "aiCallable": false,
+          "externalEffect": true
+        },
+        {
+          "id": "save.chunk",
+          "title": "save.chunk",
+          "visibility": "internal",
+          "aiCallable": false,
+          "externalEffect": true
+        },
+        {
+          "id": "save.finish",
+          "title": "save.finish",
+          "visibility": "internal",
+          "aiCallable": false,
+          "externalEffect": true
+        },
+        {
+          "id": "save.abort",
+          "title": "save.abort",
+          "visibility": "internal",
+          "aiCallable": false,
+          "externalEffect": true
         }
       ],
       "menus": [
         {
           "location": "editor.document",
-          "command": "template.open"
+          "command": "export.article"
         },
         {
           "location": "toolbar",
-          "command": "template.open"
+          "command": "export.article"
+        },
+        {
+          "location": "toolbar",
+          "command": "export.book"
         }
       ],
       "views": [
         {
           "id": "main",
-          "title": "插件模板",
+          "title": "排版导出",
           "entry": "dist/ui/index.html",
           "defaultLocation": "tab",
-          "route": "/main"
+          "route": "/main",
+          "multiple": true,
+          "commandPalette": false
         }
       ]
     }

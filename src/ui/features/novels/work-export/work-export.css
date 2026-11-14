@@ -1,0 +1,619 @@
+/* ==========================================================================
+   内容合集导出工作台（EPUB / Word / PDF）
+   左侧设置按两栏排布、右侧成书预览固定。所有颜色都走主题变量，
+   明暗主题共用一套规则。
+   ========================================================================== */
+
+.lbModalOverlay.blcWorkExportOverlay {
+  padding: 12px;
+}
+
+.lbModal.blcWorkExportModal {
+  width: min(1240px, 100%);
+  max-height: calc(100vh - 24px);
+}
+
+.blcWorkExportBody {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 296px;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* 左右两列各自堆叠小节，较短的成书信息与较高的版式并排，常规窗口一屏放下。 */
+.blcWorkExportSettings {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  gap: 14px 18px;
+  padding: 14px 18px 16px;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.blcWorkExportColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.blcWorkSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.blcWorkSectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-meta);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-tertiary);
+  text-transform: none;
+}
+
+.blcWorkSectionTitle::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-subtle);
+}
+
+/* ---- 格式卡片 ---------------------------------------------------------- */
+.blcWorkFormatCards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.blcWorkFormatCard {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 10px 11px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 9px;
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--ease-fast, 0.15s ease), background var(--ease-fast, 0.15s ease);
+}
+
+.blcWorkFormatCard strong {
+  font-size: var(--fs-body);
+  font-weight: 650;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.blcWorkFormatCard span {
+  font-size: var(--fs-micro);
+  color: var(--text-quaternary);
+  line-height: 1.3;
+}
+
+.blcWorkFormatCard svg {
+  color: var(--text-tertiary);
+}
+
+.blcWorkFormatCard:hover:not(:disabled) {
+  border-color: var(--border-default, var(--border-subtle));
+  background: var(--bg-surface-hover);
+}
+
+.blcWorkFormatCard.is-active {
+  border-color: var(--color-primary);
+  background: var(--color-primary-bg);
+}
+
+.blcWorkFormatCard.is-active strong,
+.blcWorkFormatCard.is-active svg {
+  color: var(--color-primary-light, var(--color-primary));
+}
+
+.blcWorkFormatCard:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ---- 表单 -------------------------------------------------------------- */
+.blcWorkGrid2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.blcWorkGrid3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.blcWorkField {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.blcWorkField > span {
+  font-size: var(--fs-meta);
+  color: var(--text-tertiary);
+}
+
+.blcWorkField input,
+.blcWorkField select {
+  min-width: 0;
+}
+
+.blcWorkField.is-invalid input {
+  border-color: var(--color-danger, #c0503f);
+}
+
+.blcWorkFieldError {
+  font-size: var(--fs-micro);
+  font-style: normal;
+  color: var(--color-danger, #c0503f);
+}
+
+.blcWorkInline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.blcWorkToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-meta);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.blcWorkToggle input {
+  margin: 0;
+  accent-color: var(--color-primary);
+}
+
+.blcWorkAdvanced {
+  border-top: 1px dashed var(--border-subtle);
+  padding-top: 10px;
+}
+
+.blcWorkAdvanced summary {
+  cursor: pointer;
+  font-size: var(--fs-meta);
+  color: var(--text-tertiary);
+  list-style: none;
+  user-select: none;
+}
+
+.blcWorkAdvanced summary::-webkit-details-marker {
+  display: none;
+}
+
+.blcWorkAdvanced summary::before {
+  content: '▸ ';
+}
+
+.blcWorkAdvanced[open] summary::before {
+  content: '▾ ';
+}
+
+.blcWorkAdvancedBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 10px;
+}
+
+.blcWorkPresetRow {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.blcWorkPresetNote {
+  font-size: var(--fs-micro);
+  font-style: normal;
+  color: var(--text-quaternary);
+}
+
+/* ---- 章节范围树 -------------------------------------------------------- */
+.blcWorkScope {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.blcWorkScopeModes {
+  display: flex;
+  gap: 16px;
+}
+
+.blcWorkScopeMode {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-body);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.blcWorkScopeMode input {
+  margin: 0;
+  accent-color: var(--color-primary);
+}
+
+.blcWorkScopeTree {
+  max-height: 190px;
+  overflow-y: auto;
+  padding: 4px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  background: var(--bg-soft);
+}
+
+.blcWorkScopeRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 26px;
+  padding-right: 6px;
+  border-radius: 5px;
+}
+
+.blcWorkScopeRow:hover {
+  background: var(--fill-subtle);
+}
+
+.blcWorkScopeRow.is-volume .blcWorkScopeTitle {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.blcWorkScopeToggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-quaternary);
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.blcWorkScopeToggle.is-empty {
+  cursor: default;
+}
+
+.blcWorkScopeCheck {
+  margin: 0;
+  accent-color: var(--color-primary);
+  flex: 0 0 auto;
+}
+
+.blcWorkScopeTitle {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--fs-meta);
+  color: var(--text-secondary);
+}
+
+.blcWorkScopeMeta {
+  font-size: var(--fs-micro);
+  color: var(--text-quaternary);
+  flex: 0 0 auto;
+}
+
+.blcWorkScopeEmpty {
+  padding: 10px;
+  font-size: var(--fs-meta);
+  color: var(--text-quaternary);
+  text-align: center;
+}
+
+/* ---- 预览 -------------------------------------------------------------- */
+.blcWorkPreview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 12px 16px;
+  border-left: 1px solid var(--border-subtle);
+  background: var(--bg-soft);
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.blcWorkPreviewHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.blcWorkPreviewBadge {
+  font-size: var(--fs-micro);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--color-primary-bg);
+  color: var(--color-primary);
+}
+
+.blcWorkPreviewHint {
+  font-size: var(--fs-micro);
+  color: var(--text-quaternary);
+}
+
+.blcWorkPreviewPage {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--editor-page-bg, #fffdf6);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 3px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.14);
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+
+.blcWorkPreviewPage.is-epub {
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+}
+
+.blcWorkPreviewHeader {
+  font-size: 7px;
+  letter-spacing: 0.04em;
+  color: var(--text-quaternary);
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 3px;
+}
+
+.blcWorkPreviewCover {
+  width: 62%;
+  align-self: center;
+  border-radius: 2px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.blcWorkPreviewCoverPlaceholder {
+  width: 62%;
+  aspect-ratio: 2 / 3;
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 2px;
+  background: linear-gradient(160deg, var(--fill-subtle), transparent 70%);
+  text-align: center;
+}
+
+.blcWorkPreviewCoverPlaceholder strong {
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--text-primary);
+}
+
+.blcWorkPreviewCoverPlaceholder span {
+  font-size: 8px;
+  color: var(--text-quaternary);
+}
+
+.blcWorkPreviewTitlePage {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.blcWorkPreviewTitle {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text-primary);
+}
+
+.blcWorkPreviewSubtitle {
+  font-size: 9px;
+  color: var(--text-tertiary);
+}
+
+.blcWorkPreviewAuthor,
+.blcWorkPreviewPublisher {
+  font-size: 8px;
+  color: var(--text-quaternary);
+}
+
+.blcWorkPreviewSectionTitle {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-tertiary);
+  margin-bottom: 4px;
+}
+
+.blcWorkPreviewSynopsis p {
+  margin: 0;
+  font-size: 8px;
+  color: var(--text-tertiary);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.blcWorkPreviewToc {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 8px;
+}
+
+.blcWorkPreviewTocRow {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 8px;
+  color: var(--text-secondary);
+  padding: 1.5px 0;
+}
+
+.blcWorkPreviewTocTitle {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.blcWorkPreviewTocPage {
+  color: var(--text-quaternary);
+  font-variant-numeric: tabular-nums;
+}
+
+.blcWorkPreviewBody {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 8px;
+  color: var(--text-secondary);
+}
+
+.blcWorkPreviewBody p {
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.blcWorkPreviewMuted {
+  font-size: 8px;
+  color: var(--text-quaternary);
+}
+
+.blcWorkPreviewFooter {
+  margin-top: auto;
+  text-align: center;
+  font-size: 7px;
+  color: var(--text-quaternary);
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 3px;
+}
+
+.blcWorkPreviewSummary {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  justify-content: center;
+  font-size: var(--fs-meta);
+  color: var(--text-secondary);
+}
+
+.blcWorkPreviewImages {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.blcWorkPreviewNote {
+  font-size: var(--fs-micro);
+  color: var(--text-quaternary);
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* ---- 文件名与进度 ------------------------------------------------------ */
+.blcWorkFilenameRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.blcWorkFilenameRow .lbInput {
+  flex: 1;
+  min-width: 0;
+}
+
+.blcWorkFilenameExt {
+  font-size: var(--fs-meta);
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.blcWorkProgressText {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: var(--fs-meta);
+  color: var(--text-tertiary);
+}
+
+.blcWorkWarnings {
+  font-size: var(--fs-meta);
+  color: var(--text-tertiary);
+  line-height: 1.45;
+}
+
+@media (max-width: 900px) {
+  .lbModal.blcWorkExportModal {
+    width: min(640px, calc(100vw - 24px));
+  }
+
+  .blcWorkExportBody {
+    grid-template-columns: minmax(0, 1fr);
+    overflow-y: auto;
+  }
+
+  .blcWorkExportSettings {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 16px 18px 20px;
+    overflow: visible;
+  }
+
+  .blcWorkExportColumn {
+    display: contents;
+  }
+
+  .blcWorkSection {
+    gap: 9px;
+  }
+
+  .blcWorkPreview {
+    border-left: 0;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .blcWorkGrid3,
+  .blcWorkGrid2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

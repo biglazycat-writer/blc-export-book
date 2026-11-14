@@ -1,0 +1,893 @@
+/* Shared Web-like overlays for desktop editor */
+.lbModalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.52);
+  backdrop-filter: blur(2px);
+  padding: 24px;
+  /* Menus, popovers and drawers all animate in; modals used to appear in a
+     single frame, which read as a glitch rather than a deliberate surface. */
+  animation: lbModalOverlayIn 0.16s ease both;
+}
+.lbModal {
+  width: min(560px, 100%);
+  max-height: min(86vh, 720px);
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-elevated, #1c1c22);
+  border: 1px solid var(--border-subtle, #2e2e38);
+  border-radius: 12px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+  animation: lbModalIn 0.19s var(--ease-enter, cubic-bezier(0.2, 0.9, 0.24, 1)) both;
+}
+@keyframes lbModalOverlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes lbModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lbModalOverlay,
+  .lbModal {
+    animation: none;
+  }
+}
+.lbModal.wide { width: min(640px, 100%); }
+/* AI 模型配置：更宽的双列表单，常规窗口高度内一屏放下、无需滚动。 */
+.lbModal.aiModelModal { width: min(780px, 100%); }
+.lbModalBody.aiModelBody {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  gap: 12px 16px;
+}
+.aiModelBody .span2 { grid-column: 1 / -1; }
+.aiModelBody .keyInputRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.aiModelBody .keyInputRow input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.aiModelBody .keyInputRow .icon-btn {
+  flex: 0 0 auto;
+}
+/* 报错常携带网关返回的 JSON，长串必须允许断行，否则会横向撑破弹窗。 */
+.aiModelBody .error {
+  overflow-wrap: anywhere;
+}
+/* 图片挑选场景（本地图片库 / 公众号素材库）：网格靠容器宽度出列数，
+   给到接近整屏的宽度才好挑图；高度同步放宽便于翻页浏览。 */
+.lbModal.gallery {
+  width: min(1100px, calc(100vw - 96px));
+  max-height: min(90vh, 960px);
+}
+.lbModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-subtle, #2e2e38);
+  flex-shrink: 0;
+}
+.lbModalTitle {
+  font-size: var(--fs-title);
+  font-weight: 600;
+  color: var(--text-primary, #f2f2f7);
+}
+.lbModalClose {
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-tertiary, #8e8e93);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 28px;
+  line-height: 1;
+  transition: background var(--ease-fast, 0.15s ease), color var(--ease-fast, 0.15s ease);
+}
+.lbModalClose svg {
+  flex: 0 0 auto;
+}
+.lbModalClose:hover:not(:disabled) {
+  background: var(--fill-moderate, rgba(255,255,255,0.08));
+  color: var(--text-primary, #f2f2f7);
+}
+.lbModalClose:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+.lbModalBody {
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.lbModalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border-subtle, #2e2e38);
+  flex-shrink: 0;
+}
+.lbField { display: flex; flex-direction: column; gap: 8px; }
+.lbFieldLabel {
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: var(--text-secondary, #c7c7cc);
+}
+.lbFieldHint {
+  font-size: var(--fs-meta);
+  color: var(--text-quaternary, #636366);
+  line-height: 1.45;
+}
+/* 服务商预设选择（AI 模型配置弹窗） */
+.presetGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+  gap: 8px;
+}
+.presetChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--border-subtle, #2e2e38);
+  border-radius: 8px;
+  background: var(--bg-surface, #222228);
+  color: var(--text-secondary, #c7c7cc);
+  font-size: var(--fs-meta);
+  line-height: 1.3;
+  cursor: pointer;
+  transition: border-color var(--ease-fast, 0.15s ease), color var(--ease-fast, 0.15s ease);
+}
+.presetChip:hover {
+  border-color: color-mix(in srgb, var(--color-primary, #4a6da0) 45%, var(--border-subtle, #2e2e38));
+  color: var(--text-primary, #f2f2f7);
+}
+.presetChip.active {
+  border-color: transparent;
+  background: var(--color-primary-bg, rgba(74, 109, 160, 0.22));
+  color: var(--color-primary, #8fb0d9);
+}
+.presetChip .popularTag {
+  margin-left: auto;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--color-primary-bg, rgba(74, 109, 160, 0.22));
+  color: var(--color-primary, #8fb0d9);
+  font-size: 10px;
+  line-height: 1.4;
+}
+.lbRadioRow, .lbChipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.lbRadio, .lbChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle, #2e2e38);
+  background: var(--bg-surface, #222228);
+  color: var(--text-secondary, #c7c7cc);
+  font-size: var(--fs-meta);
+  cursor: pointer;
+  user-select: none;
+}
+.lbRadio input, .lbChip input { display: none; }
+.lbRadio.active, .lbChip.active {
+  border-color: var(--color-primary);
+  background: var(--color-primary-bg);
+  color: var(--color-primary-light, #64b5ff);
+}
+.lbTextarea, .lbSelect, .lbInput {
+  width: 100%;
+  border: 1px solid var(--border-subtle, #2e2e38);
+  border-radius: 8px;
+  background-color: var(--bg-base, #121216);
+  color: var(--text-primary, #f2f2f7);
+  font-size: var(--fs-body);
+  padding: 8px 10px;
+  outline: none;
+  font-family: inherit;
+}
+.lbSelect {
+  min-height: 36px;
+  padding: 7px 34px 7px 10px;
+  line-height: 20px;
+}
+.lbTextarea { min-height: 120px; resize: vertical; line-height: 1.55; }
+.lbTextarea:focus, .lbSelect:focus, .lbInput:focus {
+  border-color: var(--color-primary);
+}
+.lbBtn {
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle, #2e2e38);
+  background: var(--bg-surface, #222228);
+  color: var(--text-secondary, #c7c7cc);
+  font-size: var(--fs-body);
+  line-height: 1;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background var(--ease-fast, 0.15s ease), border-color var(--ease-fast, 0.15s ease), color var(--ease-fast, 0.15s ease), filter var(--ease-fast, 0.15s ease);
+}
+.lbBtn svg {
+  flex: 0 0 auto;
+}
+.lbBtn:hover:not(:disabled) {
+  background: var(--fill-moderate, rgba(255,255,255,0.08));
+  border-color: var(--border-default, #3a3a44);
+  color: var(--text-primary, #f2f2f7);
+}
+.lbBtn:disabled { opacity: 0.45; cursor: not-allowed; }
+.lbBtn.primary {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+  font-weight: 600;
+}
+/* Keep the solid primary surface on hover. Generic `.lbBtn:hover` sets a grey
+   fill; without re-asserting background, "开始翻译" and other CTAs flash as
+   white text on grey. */
+.lbBtn.primary:hover:not(:disabled) {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary-light);
+  color: #fff;
+  filter: none;
+}
+.lbBtn.danger {
+  color: #ff6b6b;
+  border-color: rgba(255,107,107,0.35);
+}
+.lbBtn.danger:hover:not(:disabled) {
+  color: #ff8585;
+  border-color: rgba(255,107,107,0.55);
+  background: rgba(255,107,107,0.1);
+}
+.lbBtn.ghost {
+  background: transparent;
+  border-color: transparent;
+}
+.lbFileDrop {
+  border: 1px dashed var(--border-default, #3a3a44);
+  border-radius: 10px;
+  padding: 18px 14px;
+  text-align: center;
+  background: var(--bg-surface, #222228);
+  cursor: pointer;
+  color: var(--text-tertiary, #8e8e93);
+  font-size: var(--fs-body);
+  line-height: 1.5;
+}
+.lbFileDrop:hover { border-color: var(--color-primary); color: var(--text-secondary, #c7c7cc); }
+.lbFileDrop strong { color: var(--text-secondary, #c7c7cc); display: block; margin-bottom: 4px; }
+.lbProgress {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--fill-moderate, rgba(255,255,255,0.08));
+  overflow: hidden;
+}
+.lbProgress > i {
+  display: block;
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 999px;
+  transition: width 0.2s ease;
+}
+.lbError {
+  font-size: var(--fs-meta);
+  color: #ff6b6b;
+  line-height: 1.45;
+}
+.lbMuted { font-size: var(--fs-meta); color: var(--text-quaternary, #636366); }
+
+/* Side panels (version / annotation) */
+.lbSidePanel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 300px;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-elevated, #1c1c22);
+  border: 1px solid var(--border-subtle, #2e2e38);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.35);
+}
+.lbSidePanel.left {
+  left: 0;
+  border-right: 1px solid var(--border-subtle, #2e2e38);
+  border-left: none;
+  box-shadow: 4px 0 16px rgba(0,0,0,0.25);
+}
+.lbSidePanel.right {
+  right: 0;
+  border-left: 1px solid var(--border-subtle, #2e2e38);
+  border-right: none;
+  box-shadow: -4px 0 16px rgba(0,0,0,0.25);
+}
+.lbSideHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-subtle, #2e2e38);
+  flex-shrink: 0;
+}
+.lbSideHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-tertiary, #8e8e93);
+  min-width: 0;
+}
+.lbSideHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.lbHeaderAction {
+  height: 28px;
+  padding: 0 9px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary, #c7c7cc);
+  font-size: var(--fs-meta);
+  line-height: 1;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+.lbHeaderAction svg { flex: 0 0 auto; }
+.lbHeaderAction:hover:not(:disabled) {
+  border-color: var(--border-subtle, #2e2e38);
+  background: var(--fill-moderate, rgba(255,255,255,0.08));
+  color: var(--text-primary, #f2f2f7);
+}
+.lbHeaderAction:disabled { opacity: 0.42; cursor: not-allowed; }
+.lbSideTitle {
+  font-size: var(--fs-body);
+  font-weight: 500;
+  color: var(--text-secondary, #c7c7cc);
+}
+.lbSideCount {
+  font-size: var(--fs-micro);
+  color: var(--text-quaternary, #636366);
+  background: var(--fill-moderate, rgba(255,255,255,0.08));
+  padding: 1px 6px;
+  border-radius: 8px;
+}
+.lbSideBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+.lbSideEmpty {
+  padding: 28px 12px;
+  text-align: center;
+  font-size: var(--fs-meta);
+  color: var(--text-quaternary, #636366);
+  line-height: 1.6;
+}
+.lbVersionItem, .lbAnnoItem {
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 4px;
+  border: 1px solid transparent;
+  transition: background 0.15s;
+}
+.lbVersionItem:hover, .lbAnnoItem:hover { background: var(--fill-subtle, rgba(255,255,255,0.04)); }
+.lbVersionItem.active, .lbAnnoItem.active {
+  background: var(--fill-light, rgba(255,255,255,0.06));
+  border-color: var(--border-subtle, #2e2e38);
+}
+.lbVersionMeta, .lbAnnoMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.lbVersionTime, .lbAnnoTime {
+  font-size: var(--fs-meta);
+  color: var(--text-tertiary, #8e8e93);
+  font-weight: 500;
+}
+.lbVersionWords {
+  font-size: var(--fs-micro);
+  color: var(--text-quaternary, #636366);
+  flex-shrink: 0;
+}
+.lbVersionPreview, .lbAnnoQuote {
+  font-size: var(--fs-meta);
+  color: var(--text-quaternary, #636366);
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lbAnnoNote {
+  font-size: var(--fs-meta);
+  color: var(--text-secondary, #c7c7cc);
+  line-height: 1.5;
+  margin-top: 4px;
+}
+.lbVersionActions, .lbAnnoActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-minimal, #2a2a32);
+}
+.lbComposer {
+  border-top: 1px solid var(--border-subtle, #2e2e38);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+  background: var(--bg-surface, #222228);
+}
+.lbComposerQuote {
+  font-size: var(--fs-meta);
+  color: var(--text-tertiary, #8e8e93);
+  background: var(--bg-base, #121216);
+  border-radius: 6px;
+  padding: 6px 8px;
+  line-height: 1.45;
+  max-height: 64px;
+  overflow: auto;
+}
+
+/* Fixed portal menus for toolbar */
+.tbMenuPortal {
+  position: fixed;
+  min-width: 180px;
+  max-height: calc(100vh - 16px);
+  overflow-y: auto;
+  background: var(--bg-elevated, #1c1c22);
+  border: 1px solid var(--border-subtle, #2e2e38);
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+  padding: 4px;
+  z-index: 1300;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.tbMenuPortal button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  border: none !important;
+  background: transparent !important;
+  color: var(--text-secondary, #c7c7cc) !important;
+  font-size: var(--fs-meta);
+  padding: 7px 10px !important;
+  border-radius: 6px !important;
+  cursor: pointer;
+  box-shadow: none !important;
+}
+.tbMenuPortal button:hover {
+  background: var(--border-light, rgba(255,255,255,0.08)) !important;
+  color: var(--text-primary, #f2f2f7) !important;
+}
+/* Right tool drawer polish */
+.toolPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  min-height: 0;
+  padding: 4px 2px 8px;
+}
+.toolPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.toolPanelHeader strong {
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: var(--text-primary, #f2f2f7);
+}
+.toolPanelDesc {
+  margin: 0;
+  font-size: var(--fs-meta);
+  line-height: 1.55;
+  color: var(--text-tertiary, #8e8e93);
+}
+.toolPanel label.form-grid,
+.toolPanel .form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: var(--fs-meta);
+  color: var(--text-tertiary, #8e8e93);
+}
+.toolPanel select,
+.toolPanel textarea,
+.toolPanel input[type="text"] {
+  width: 100%;
+  border: 1px solid var(--border-subtle, #2e2e38);
+  border-radius: 8px;
+  background: var(--bg-base, #121216);
+  color: var(--text-primary, #f2f2f7);
+  font-size: var(--fs-body);
+  padding: 8px 10px;
+  font-family: inherit;
+}
+.toolPanel textarea { resize: vertical; line-height: 1.55; }
+.toolPanel .row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.toolPanel button.primary {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+.toolPanel button.primary:hover:not(:disabled) {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary-light);
+  color: #fff;
+}
+.toolPanel .ai-output {
+  flex: 1;
+  min-height: 160px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--fs-meta);
+}
+.toolChecklist {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.toolChecklist label {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: var(--fs-meta);
+  line-height: 1.45;
+  color: var(--text-secondary, #c7c7cc);
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--bg-surface, #222228);
+  border: 1px solid var(--border-subtle, #2e2e38);
+}
+.toolChecklist input { margin-top: 2px; }
+.toolPlaceholderCard {
+  border: 1px dashed var(--border-default, #3a3a44);
+  border-radius: 10px;
+  padding: 16px;
+  background: var(--bg-surface, #222228);
+  color: var(--text-tertiary, #8e8e93);
+  font-size: var(--fs-meta);
+  line-height: 1.6;
+}
+.toolPlaceholderCard h4 {
+  margin: 0 0 6px;
+  font-size: var(--fs-body);
+  color: var(--text-secondary, #c7c7cc);
+  font-weight: 600;
+}
+
+/* ===== Export settings (aligned with Web ExportModal) ===== */
+/* 左参数 / 右预览的双栏，参数再多也一屏放下，不出现滚动条。 */
+.lbExportModal {
+  width: min(1060px, calc(100vw - 48px));
+  max-height: min(92vh, 900px);
+}
+.lbModalBody.lbExportModalBody {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 460px;
+  align-items: stretch;
+  gap: 20px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+.lbExportSettings {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  /* 参数实在放不下时允许滚动，但不要出现滚动条 —— 它会占掉一列宽度。 */
+  scrollbar-width: none;
+}
+.lbExportSettings::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+.lbExportPreviewPane {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  min-height: 0;
+}
+.lbExportPreviewHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: var(--fs-meta);
+  color: var(--text-tertiary, #8e8e93);
+}
+.lbExportPreviewDim {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.75;
+}
+.lbExportPreviewViewport {
+  flex: 1 1 auto;
+  min-height: 320px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 12px;
+  /* 预览永远不滚：按宽度缩放到视口里，纵向超出就裁掉。 */
+  overflow: hidden;
+  border: 1px solid var(--border-subtle, #2e2e38);
+  border-radius: 10px;
+  /* 棋盘底：海报自带底色（默认浅灰 #f2f3f5），视口再用纯色就跟海报糊成一片，
+     看不出长图/海报的边界，也看不出海报到底多大。棋盘格在任何底色下都能显出轮廓。 */
+  background-color: #f0f0f3;
+  background-image:
+    linear-gradient(45deg, #dcdce2 25%, transparent 25%, transparent 75%, #dcdce2 75%),
+    linear-gradient(45deg, #dcdce2 25%, transparent 25%, transparent 75%, #dcdce2 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 8px 8px;
+}
+.lbExportPreviewStage {
+  position: relative;
+  flex: none;
+  overflow: hidden;
+  border-radius: 4px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+.lbExportPreviewNote {
+  font-size: var(--fs-meta);
+  color: var(--text-tertiary, #8e8e93);
+  text-align: center;
+}
+.lbExportPreviewNote.error {
+  color: var(--text-danger, #ff6b6b);
+  overflow-wrap: anywhere;
+}
+.lbExportWmHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px;
+  border: 1px solid var(--border-subtle, #2e2e38);
+  border-radius: 8px;
+  background: var(--bg-surface, #222228);
+}
+.lbExportWmGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+}
+.lbExportField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  font-size: var(--fs-meta);
+  color: var(--text-tertiary, #8e8e93);
+}
+.lbExportFieldFull,
+.lbExportPreview {
+  grid-column: 1 / -1;
+}
+.lbExportField input[type="range"] {
+  width: 100%;
+  accent-color: var(--color-primary);
+}
+.lbExportColor {
+  width: 100%;
+  height: 32px;
+  padding: 2px;
+  border: 1px solid var(--border-subtle, #2e2e38);
+  border-radius: 6px;
+  background-color: var(--bg-base, #121216);
+  cursor: pointer;
+}
+.lbExportPreview {
+  position: relative;
+  height: 92px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px dashed var(--border-default, #3a3a44);
+  border-radius: 8px;
+  background: var(--bg-surface, #222228);
+}
+.lbExportProgress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 4px;
+}
+.lbSwitch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.lbSwitch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+.lbSwitch span {
+  position: absolute;
+  inset: 0;
+  background: var(--fill-strong, rgba(255,255,255,0.16));
+  border-radius: 999px;
+  transition: background 0.15s ease;
+}
+.lbSwitch span::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 3px;
+  top: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.15s ease;
+}
+.lbSwitch input:checked + span {
+  background: var(--color-primary);
+}
+.lbSwitch input:checked + span::after {
+  transform: translateX(20px);
+}
+.lbSwitch input:disabled + span {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ===== Poster layout (PNG share card) ===== */
+.lbPosterSwatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.lbPosterSwatch {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--border-subtle, #2e2e38);
+  border-radius: 8px;
+  cursor: pointer;
+  background-color: var(--bg-base, #121216);
+  background-size: cover;
+  background-position: center;
+}
+.lbPosterSwatch.active {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary);
+}
+.lbPosterSwatch:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+/* 自定义那一格画棋盘格，提示要另选颜色 */
+.lbPosterSwatch.is-custom {
+  background-image:
+    linear-gradient(45deg, #d0d0d0 25%, transparent 25%, transparent 75%, #d0d0d0 75%),
+    linear-gradient(45deg, #d0d0d0 25%, #fff 25%, #fff 75%, #d0d0d0 75%);
+  background-size: 12px 12px;
+  background-position: 0 0, 6px 6px;
+}
+
+/* ===== Whole work export ===== */
+/* 合集导出的工作台样式在 features/novels/work-export/work-export.css；
+   这里只留 WebClipModal 仍在用的勾选卡片。 */
+.lbCheckCard {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 12px;
+  border: 1px solid var(--border-subtle, #2e2e38);
+  border-radius: 8px;
+  background: var(--bg-surface, #222228);
+  cursor: pointer;
+}
+.lbCheckCard input {
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+  accent-color: var(--color-primary);
+  flex-shrink: 0;
+}
+.lbCheckCard span {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.lbCheckCard strong {
+  font-size: var(--fs-body);
+  color: var(--text-primary, #f2f2f7);
+  line-height: 1.25;
+}
+.lbCheckCard em {
+  font-style: normal;
+  font-size: var(--fs-meta);
+  color: var(--text-quaternary, #636366);
+  line-height: 1.35;
+}
+.lbCheckCard.active {
+  border-color: color-mix(in srgb, var(--color-primary) 56%, var(--border-subtle, #2e2e38));
+  background: var(--color-primary-bg);
+}
+
+@media (max-width: 720px) {
+  .lbCheckCard {
+    width: 100%;
+  }
+}
+
+.lbCheckRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-body);
+  color: var(--text-secondary, #c7c7cc);
+}
+.lbCheckRow input { margin: 0; }

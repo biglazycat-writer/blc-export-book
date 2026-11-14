@@ -6,7 +6,7 @@
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
-import {basename, join} from 'node:path';
+import {basename, join, resolve, sep} from 'node:path';
 
 const outDir = 'dist-package';
 const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
@@ -30,6 +30,8 @@ if (!existsSync('dist/main.js')) {
 }
 
 const stage = join(outDir, 'package');
+const absoluteStage = resolve(stage);
+if (!absoluteStage.startsWith(resolve(outDir) + sep)) throw new Error('Invalid staging path');
 rmSync(stage, {recursive: true, force: true});
 mkdirSync(stage, {recursive: true});
 
@@ -38,7 +40,12 @@ for (const entry of pkg.files ?? []) {
     console.error(`✗ package.json 的 files 声明了不存在的路径：${entry}`);
     process.exit(1);
   }
-  cpSync(entry, join(stage, entry), {recursive: true});
+  // This report is written after verifying the finished archive, so it cannot
+  // be part of that archive without retaining a stale checksum/result.
+  cpSync(entry, join(stage, entry), {
+    recursive: true,
+    filter: source => resolve(source) !== resolve('docs/final-verification.md'),
+  });
 }
 cpSync('package.json', join(stage, 'package.json'));
 
@@ -79,4 +86,4 @@ console.log(`✓ ${basename(archive)}（${entries.length} 个条目）`);
 console.log('✓ 结构校验通过：顶层 package/，含 package.json 与 package-lock.json');
 console.log(`✓ SHA-256 ${sha}`);
 console.log('');
-console.log('桌面端「安装插件 → 插件包 (.zip / .tgz)」选择该文件，并勾选「准备依赖、类型检查并构建」。');
+console.log('桌面端「安装插件 → 插件包 (.zip / .tgz)」选择该文件。包内已含引擎、字体与全部构建产物，无需准备依赖或再次构建。');

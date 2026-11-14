@@ -1,0 +1,141 @@
+.imageDesigner { display: flex; flex-direction: column; height: 100%; min-height: 0; background: var(--bg-soft); color: var(--text-primary); }
+.imageDesignerHeader { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 20px; border-bottom: 1px solid var(--border-subtle); background: var(--bg-surface); }
+.imageDesignerHeading, .imageDesignerActions { display: flex; align-items: center; gap: 16px; }
+.imageDesignerHeading h1 { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; font-size: 15px; }
+.imageDesignerHeading span, .imageDesignerNotice { color: var(--text-tertiary); font-size: 12px; }
+.imageDesignerNotice { display: flex; align-items: center; gap: 5px; }
+.imageDesignerMain { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(560px, 680px); min-height: 0; }
+.imageDesignerPreview { display: flex; flex-direction: column; min-width: 0; min-height: 0; position: relative; }
+.imageDesignerPreviewBar { display: flex; justify-content: space-between; padding: 14px 22px; font-size: 12px; color: var(--text-tertiary); }
+.imageDesignerViewport { flex: 1; min-height: 0; overflow: auto; padding: 28px 32px 56px; background-image: radial-gradient(var(--border-subtle) 1px, transparent 1px); background-size: 16px 16px; }
+.imageDesignerScaled { margin: 0 auto; position: relative; }
+.imageDesignerScaled > div { position: absolute; top: 0; left: 0; }
+.imageDesignerZoom { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 10px; border-top: 1px solid var(--border-subtle); font-size: 12px; }
+.imageDesignerSidebar { min-height: 0; display: flex; flex-direction: column; border-left: 1px solid var(--border-subtle); background: var(--bg-surface); }
+.imageDesignerControls { margin: 0; padding: 4px 20px 24px; border: 0; min-width: 0; overflow: auto; }
+.imageDesignerColumns { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 28px; align-items: start; }
+.imageDesignerControls section { padding: 20px 0; border-bottom: 1px solid var(--border-subtle); }
+.imageDesignerControls h2 { font-size: 13px; margin: 0 0 16px; }
+.imageDesignerField { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; font-size: 12px; color: var(--text-secondary); }
+.imageDesignerField input[type="range"] { width: 100%; margin: 4px 0; accent-color: var(--color-primary); }
+.imageDesignerField input[type="color"] { width: 100%; height: 30px; border: 1px solid var(--border-subtle); border-radius: 5px; background: transparent; cursor: pointer; }
+.imageDesignerLayouts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.imageDesignerLayouts > button { display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 8px; border: 1px solid var(--border-subtle); border-radius: 8px; background: transparent; color: var(--text-primary); cursor: pointer; text-align: left; }
+.imageDesignerLayouts > button[aria-pressed="true"] { border-color: var(--color-primary); background: var(--color-primary-bg); }
+.imageDesignerLayouts > button > strong { font-size: 12px; }
+.imageDesignerLayouts > button > span { font-size: 10px; line-height: 1.5; color: var(--text-tertiary); }
+.imageDesignerLayoutSample { width: 90px; height: 120px; align-self: center; overflow: hidden; pointer-events: none; }
+.imageDesignerLayoutSample .imageDesignCanvas { transform: scale(0.25); transform-origin: top left; }
+.imageDesignerThemes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.imageDesignerThemes button { display: block; background: transparent; border: 1px solid transparent; border-radius: 8px; padding: 4px; font-size: 11px; color: var(--text-secondary); cursor: pointer; }
+.imageDesignerThemes button[aria-pressed="true"] { border-color: var(--color-primary); background: var(--color-primary-bg); }
+.imageDesignerThemes button > span { display: grid; place-items: center; height: 60px; border-radius: 5px; margin-bottom: 7px; }
+.imageDesignerThemes i { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 4px; font-family: "LXGW WenKai", serif; font-size: 23px; font-style: normal; box-shadow: 0 3px 8px #0002; }
+.imageDesignerToggle { display: flex; align-items: center; gap: 8px; margin-top: 16px; font-size: 12px; }
+.imageDesignerToggle input { accent-color: var(--color-primary); }
+.imageDesignerSource { resize: vertical; min-height: 160px; font-family: ui-monospace, monospace; line-height: 1.7; }
+.imageDesignerHint { font-size: 12px; line-height: 1.7; color: var(--text-tertiary); }
+.imageDesignerError { padding: 12px 20px; color: var(--color-danger, #c0503f); background: var(--bg-surface); font-size: 12px; line-height: 1.6; }
+.imageDesignerLoading { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 60px; font-size: 13px; }
+
+/* Export surface: own typography and colors, independent of the application/editor theme. */
+.imageDesignCanvas { box-sizing: border-box; position: relative; overflow: hidden; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; line-break: strict; --image-paragraph-gap: 1em; --image-title-scale: 1.8; }
+.imageDesignCanvas *, .imageDesignCanvas *::before, .imageDesignCanvas *::after { box-sizing: border-box; }
+.imageDesignCard { position: relative; display: flex; flex-direction: column; padding: var(--image-padding); border-radius: var(--image-radius); background: var(--image-card); font-size: var(--image-font-size); line-height: var(--image-line-height); overflow-wrap: anywhere; }
+.imageDesignCard.has-shadow { box-shadow: 0 10px 28px #0000001c, 0 2px 5px #00000008; }
+.imageDesignCanvas.is-fixed .imageDesignCard { height: 100%; }
+.imageDesignTitle { flex: none; padding-bottom: 1.4em; }
+.imageDesignAccent { display: inline-block; width: 32px; height: 4px; background: var(--image-accent); border-radius: 2px; margin-bottom: 0.9em; }
+.imageDesignTitle h1 { color: inherit; font-family: inherit; font-size: calc(var(--image-title-scale) * 1em); line-height: 1.4; letter-spacing: 0.015em; font-weight: 700; margin: 0; white-space: pre-wrap; text-wrap: balance; }
+.imageDesignTitle p { color: var(--image-accent); font-size: 0.7em; margin: 1em 0 0; white-space: pre-wrap; }
+.imageDesignContent { flex: none; min-width: 0; }
+.imageDesignContent > :first-child { margin-top: 0; }
+.imageDesignContent > :last-child { margin-bottom: 0; }
+.imageDesignContent p { margin: 0 0 var(--image-paragraph-gap); color: inherit; font-family: inherit; font-size: inherit; line-height: inherit; text-wrap: pretty; }
+.imageDesignContent h1, .imageDesignContent h2, .imageDesignContent h3, .imageDesignContent h4, .imageDesignContent h5, .imageDesignContent h6 { color: inherit; font-family: inherit; line-height: 1.5; margin: 1.5em 0 0.65em; font-weight: 700; }
+.imageDesignContent h1 { font-size: 1.6em; }
+.imageDesignContent h2 { font-size: 1.35em; }
+.imageDesignContent h3 { font-size: 1.15em; }
+.imageDesignContent h4, .imageDesignContent h5, .imageDesignContent h6 { font-size: 1em; }
+.imageDesignContent blockquote { border-left: 3px solid var(--image-accent); background: color-mix(in srgb, var(--image-accent) 8%, transparent); margin: 1.2em 0; padding: 0.8em 1em; }
+.imageDesignContent blockquote p:last-child { margin-bottom: 0; }
+.imageDesignContent a { color: var(--image-accent); text-decoration: underline; }
+.imageDesignContent ul, .imageDesignContent ol { padding-left: 1.5em; margin: 1em 0; }
+.imageDesignContent li { margin: 0.4em 0; }
+.imageDesignContent li p { margin: 0; }
+.imageDesignContent pre { background: color-mix(in srgb, var(--image-accent) 9%, var(--image-card)); border: 1px solid color-mix(in srgb, var(--image-accent) 20%, transparent); border-radius: 8px; padding: 1em; margin: 1.2em 0; white-space: pre-wrap; overflow-wrap: anywhere; text-align: left; font-size: 0.75em; line-height: 1.7; }
+.imageDesignContent code { font-family: Consolas, ui-monospace, monospace; }
+.imageDesignContent :not(pre) > code { padding: 0.12em 0.3em; background: color-mix(in srgb, var(--image-accent) 10%, transparent); border-radius: 3px; }
+.imageDesignContent .hljs-keyword, .imageDesignContent .hljs-literal, .imageDesignContent .hljs-title { color: var(--image-accent); font-weight: 600; }
+.imageDesignContent .hljs-comment { opacity: 0.6; }
+.imageDesignContent img { display: block; max-width: 100%; height: auto; margin: 1em auto; border-radius: 6px; }
+.imageDesignContent table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 0.8em; margin: 1em 0; }
+.imageDesignContent th, .imageDesignContent td { border: 1px solid color-mix(in srgb, var(--image-accent) 30%, transparent); padding: 0.6em; }
+.imageDesignContent th { background: color-mix(in srgb, var(--image-accent) 10%, transparent); }
+.imageDesignContent hr { border: 0; border-top: 1px solid var(--image-accent); opacity: 0.3; margin: 1.5em 0; }
+.imageDesignContent .editor-formula.display { display: block; text-align: center; margin: 1em 0; }
+.imageDesignContent summary { font-weight: 600; margin-bottom: 0.6em; }
+.imageDesignContent .mdCallout { padding: 0.8em 1em; margin: 1.2em 0; border-radius: 6px; color: #302e29; }
+.imageDesignContent .mdCallout p:last-child { margin-bottom: 0; }
+.imageDesignContent .mdCalloutTitle { font-size: 0.8em; font-weight: 600; }
+.imageDesignContent .mdTaskList { list-style: none; padding-left: 0; }
+.imageDesignFooter { flex: none; margin-top: auto; padding-top: 2em; color: var(--image-accent); font-size: 0.65em; white-space: pre-wrap; }
+.imageDesignFooter::before { content: ''; display: block; width: 100%; height: 1px; background: currentColor; opacity: 0.25; margin-bottom: 1.2em; }
+
+/* Use the bundled medium weight instead of synthesizing a heavy WenKai bold. */
+.imageDesignCanvas[data-font="wenkai"] :is(h1, h2, h3, h4, h5, h6, strong, b, th, summary) { font-weight: 500; }
+
+/* Essay: a quiet title, indented paragraphs, and a signature after the text. */
+.imageDesignCanvas[data-layout="essay"] { --image-title-scale: 1.65; --image-paragraph-gap: 0.85em; }
+.imageDesignCanvas[data-layout="essay"] .imageDesignTitle { padding-bottom: 1.8em; }
+.imageDesignCanvas[data-layout="essay"] .imageDesignAccent { width: 24px; height: 2px; }
+.imageDesignCanvas[data-layout="essay"][data-align="left"] .imageDesignContent > p:not(:has(img, .editor-formula.display)) { text-indent: 2em; }
+.imageDesignCanvas[data-layout="essay"] .imageDesignContent blockquote { border-left-width: 2px; border-radius: 0 8px 8px 0; font-size: 0.95em; }
+.imageDesignCanvas[data-layout="essay"] .imageDesignFooter { text-align: right; margin-top: 0; padding-top: 2.4em; }
+
+/* Editorial: strong hierarchy, rules and a distinct byline. */
+.imageDesignCanvas[data-layout="editorial"] { --image-title-scale: 2.15; --image-paragraph-gap: 1.15em; }
+.imageDesignCanvas[data-layout="editorial"] .imageDesignTitle { border-top: 4px solid var(--image-accent); border-bottom: 1px solid var(--image-accent); padding: 1.1em 0 1.2em; margin-bottom: 1.6em; }
+.imageDesignCanvas[data-layout="editorial"] .imageDesignAccent { display: none; }
+.imageDesignCanvas[data-layout="editorial"] .imageDesignTitle p { text-align: right; font-size: 0.75em; }
+.imageDesignCanvas[data-layout="editorial"] .imageDesignContent h2 { border-left: 4px solid var(--image-accent); padding-left: 0.65em; margin-top: 1.8em; }
+.imageDesignCanvas[data-layout="editorial"] .imageDesignContent blockquote { border-left: 0; border-top: 1px solid var(--image-accent); border-bottom: 1px solid var(--image-accent); background: transparent; padding: 1em 0; font-size: 1.1em; }
+.imageDesignCanvas[data-layout="editorial"] .imageDesignContent img { border-radius: 0; }
+.imageDesignCanvas[data-layout="editorial"] .imageDesignFooter::before { height: 2px; opacity: 0.65; }
+
+/* Poetry: center the complete composition when the poster has spare space. */
+.imageDesignCanvas[data-layout="poetry"] { --image-title-scale: 1.5; --image-paragraph-gap: 1.35em; }
+.imageDesignCanvas[data-layout="poetry"] .imageDesignCard { justify-content: safe center; }
+.imageDesignCanvas[data-layout="poetry"] .imageDesignTitle { padding-bottom: 1.6em; }
+.imageDesignCanvas[data-layout="poetry"] .imageDesignAccent { width: 6px; height: 6px; border-radius: 50%; margin-bottom: 1em; }
+.imageDesignCanvas[data-layout="poetry"] .imageDesignContent blockquote { border: 0; background: transparent; padding: 0.7em 0; color: var(--image-accent); }
+.imageDesignCanvas[data-layout="poetry"] .imageDesignContent blockquote::before { content: '“'; display: block; font-size: 2.2em; line-height: 0.8; padding-top: 0.15em; }
+.imageDesignCanvas[data-layout="poetry"] .imageDesignContent :is(ul, ol, table, pre) { text-align: left; }
+.imageDesignCanvas[data-layout="poetry"] .imageDesignFooter { margin-top: 0; padding-top: 1.8em; }
+.imageDesignCanvas[data-layout="poetry"] .imageDesignFooter::before { width: 24px; margin: 0 auto 1.1em; }
+
+/* Minimal: compact reading rhythm and unobtrusive section dividers. */
+.imageDesignCanvas[data-layout="minimal"] { --image-title-scale: 1.5; --image-paragraph-gap: 0.75em; }
+.imageDesignCanvas[data-layout="minimal"] .imageDesignCard { border: 1px solid color-mix(in srgb, var(--image-accent) 22%, transparent); }
+.imageDesignCanvas[data-layout="minimal"] .imageDesignAccent { display: none; }
+.imageDesignCanvas[data-layout="minimal"] .imageDesignTitle { padding-bottom: 1em; margin-bottom: 1.2em; border-bottom: 1px solid color-mix(in srgb, var(--image-accent) 25%, transparent); }
+.imageDesignCanvas[data-layout="minimal"] .imageDesignContent h2 { font-size: 1.15em; padding-bottom: 0.35em; border-bottom: 1px solid color-mix(in srgb, var(--image-accent) 20%, transparent); }
+.imageDesignCanvas[data-layout="minimal"] .imageDesignContent li { margin: 0.2em 0; }
+.imageDesignCanvas[data-layout="minimal"] .imageDesignContent blockquote { border-left-width: 2px; background: transparent; padding: 0.3em 0.8em; }
+.imageDesignCanvas[data-layout="minimal"] .imageDesignFooter { margin-top: 0; padding-top: 1.5em; }
+.imageDesignCanvas[data-layout="minimal"] .imageDesignFooter::before { display: none; }
+@media (max-width: 1100px) {
+  .imageDesignerMain { grid-template-columns: minmax(0, 1fr) 420px; }
+  .imageDesignerColumns { grid-template-columns: 1fr; }
+}
+@media (max-width: 850px) {
+  .imageDesignerMain { grid-template-columns: minmax(0, 1fr) 320px; }
+  .imageDesignerHeader { padding: 10px; gap: 8px; flex-wrap: wrap; }
+  .imageDesignerHeading > div > span { display: none; }
+  .imageDesignerNotice { max-width: 160px; }
+}
+@media (max-width: 580px) {
+  .imageDesignerMain { display: flex; flex-direction: column; overflow: auto; }
+  .imageDesignerPreview { min-height: 420px; flex: none; height: 55vh; }
+  .imageDesignerSidebar { flex: none; max-height: 60vh; border-left: 0; border-top: 1px solid var(--border-subtle); }
+}

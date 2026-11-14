@@ -1,0 +1,567 @@
+/* One set of surface tokens for every component drawn on the canvas. Cards,
+   data views, notes and shapes all pick their border, radius and ink from here
+   so the library reads as a single family rather than a collection. */
+.structuredCanvasEditor {
+  --canvas-surface: #ffffff;
+  --canvas-surface-border: #dce3ed;
+  --canvas-surface-divider: #edf0f5;
+  --canvas-radius: 6px;
+  --canvas-ink: #263146;
+  --canvas-ink-muted: #7c879b;
+  --canvas-shape-stroke: #334155;
+  --canvas-dock-width: 300px;
+  height: 100%; min-height: 0; display: flex; flex-direction: column; color: var(--text, #182033); background: var(--bg-base, #f6f7fb);
+}
+/* Same frosted surface and divider token every other editor header uses, so the
+   canvas does not read as a differently-coloured page. */
+.structuredCanvasHeader { min-height: 42px; display: flex; align-items: center; gap: 9px; padding: 0 12px; border-bottom: 1px solid var(--border-subtle, var(--border, #dde3ee)); background: var(--frame-surface, var(--bg-elevated, #fff)); }
+.structuredCanvasHeader > button { width: 30px; height: 30px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 6px; background: transparent; color: inherit; cursor: pointer; }
+.structuredCanvasHeader > button:hover { color: var(--accent, #4f67e8); background: color-mix(in srgb, var(--accent, #4f67e8) 9%, transparent); }
+.structuredCanvasHeaderStatus { color: var(--text-muted, #758096); font-size: 11px; }
+.structuredCanvasTitle { flex: 1; min-width: 0; display: flex; flex-direction: column; margin-left: 4px; }
+.structuredCanvasTitle strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
+.structuredCanvasTitle small { color: var(--text-muted, #7c8599); font-size: 10px; }
+.structuredCanvasBody { position: relative; flex: 1; min-height: 0; display: flex; overflow: hidden; }
+/* inline-size containment makes the stage a container so the bottom toolbar
+   can adapt to the space left beside the docks instead of the viewport. */
+.structuredCanvasStage { flex: 1; min-width: 0; min-height: 0; position: relative; container-type: inline-size; background: var(--canvas-background, var(--bg-base, #f7f8fc)); }
+.structuredCanvasStage.handDrawn .react-flow__background { opacity: .82; }.structuredCanvasStage.handDrawn .structuredCanvasShapeLabel, .structuredCanvasStage.handDrawn .structuredCanvasText{
+  font-family: "LXGW WenKai", "Segoe Print", "KaiTi", "STKaiti", cursive;
+}
+.structuredCanvasStage .react-flow__node { border: 0; background: transparent; box-shadow: none; padding: 0; }
+.structuredCanvasStage .react-flow__node.selected { box-shadow: none; }
+.structuredCanvasStage .react-flow__node.selectable:focus,
+.structuredCanvasStage .react-flow__node.selectable:focus-visible { outline: none; box-shadow: none; }
+.structuredCanvasStage .react-flow__nodesselection-rect { border: 0; background: transparent; }
+/* The control box is a generous 24px grab area; the small square drawn inside it
+   is the visible affordance. Sizing the two separately is what lets a shape
+   whose outline never reaches its own bounding box still show where resizing can
+   be grabbed: on a diamond or an ellipse the bounding-box corners are empty
+   space, so an invisible handle there left the gesture undiscoverable. */
+.structuredCanvasStage .react-flow__resize-control.handle.structuredCanvasResizeHandle { width: 24px !important; height: 24px !important; z-index: 30 !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; pointer-events: auto !important; touch-action: none; }
+.structuredCanvasStage .react-flow__resize-control.handle.structuredCanvasResizeHandle::after {
+  content: ''; position: absolute; left: 50%; top: 50%; width: 9px; height: 9px; box-sizing: border-box;
+  transform: translate(-50%, -50%); border: 1.5px solid var(--accent, #5b6ee8); border-radius: 2px;
+  background: var(--bg-elevated, #fff); box-shadow: 0 1px 3px rgba(31, 42, 68, .24);
+}
+.structuredCanvasStage .structuredCanvasResizeHandle:is(.top.left, .bottom.right) { cursor: nwse-resize !important; }
+.structuredCanvasStage .structuredCanvasResizeHandle:is(.top.right, .bottom.left) { cursor: nesw-resize !important; }
+/* The four edge controls resize one axis each and are the targets that land on a
+   diamond's or a triangle's visible outline instead of in the empty corners of
+   its bounding box, so they are what makes every shape kind grabbable. They stay
+   invisible — the outline already reads as the affordance — but the 1px upstream
+   line is widened into a band the pointer can actually hit. No z-index here on
+   purpose: the ports render after the resizer, so they keep winning the border
+   midpoints and the connect gesture survives while the rest of each edge
+   resizes. */
+.structuredCanvasStage .react-flow__resize-control.line.structuredCanvasResizeLine { border-width: 0 !important; touch-action: none; }
+.structuredCanvasStage .react-flow__resize-control.line.structuredCanvasResizeLine:is(.top, .bottom) { height: 11px !important; }
+.structuredCanvasStage .react-flow__resize-control.line.structuredCanvasResizeLine:is(.left, .right) { width: 11px !important; }
+.structuredCanvasNode { position: relative; width: 100%; height: 100%; }
+.structuredCanvasNodeToolbar { position: absolute; z-index: 20; left: 50%; bottom: calc(100% + 9px); height: 34px; display: flex; align-items: center; gap: 3px; padding: 3px; border: 1px solid color-mix(in srgb, var(--border, #d8deea) 88%, transparent); border-radius: 9px; background: color-mix(in srgb, var(--bg-elevated, #fff) 96%, transparent); box-shadow: 0 8px 24px rgba(31, 42, 68, .16); }
+.structuredCanvasNodeToolbar button { width: 28px; height: 28px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 6px; background: transparent; color: var(--text-muted, #657086); cursor: pointer; }
+.structuredCanvasNodeToolbar button:hover { color: var(--accent, #4f67e8); background: color-mix(in srgb, var(--accent, #4f67e8) 10%, transparent); }
+.structuredCanvasNodeToolbar button.danger:hover { color: #dc3545; background: color-mix(in srgb, #dc3545 12%, transparent); }
+.structuredCanvasNodeToolbar .divider { width: 1px; height: 18px; margin: 0 2px; background: var(--border, #d8deea); }
+/* Selection recolours the component's own border; it never draws another box. */
+.structuredCanvasNode > :not(.structuredCanvasNodeToolbar) { box-sizing: border-box; transition: border-color .14s ease; }
+.structuredCanvasNode.selected .structuredCanvasText { border-color: var(--accent, #5b6ee8); }
+/* Shapes carry their own SVG stroke; recolouring it keeps the geometry exact
+   instead of drawing a rectangular outline around a diamond or a circle. */
+.structuredCanvasNode.shape.selected > :not(.structuredCanvasNodeToolbar) { outline: none; }
+.structuredCanvasNode.shape.selected .canvasShapeStroke { stroke: var(--accent, #5b6ee8); }
+.structuredCanvasUnknown { height: 100%; display: grid; place-items: center; border: 1px dashed #ef4444; border-radius: 10px; background: #fff1f2; color: #be123c; }
+.structuredCanvasStatus { min-height: 26px; display: flex; align-items: center; gap: 18px; padding: 0 12px; border-top: 1px solid var(--border, #dde3ee); color: var(--text-muted, #758096); background: var(--bg-elevated, #fff); font-size: 11px; }
+.structuredCanvasStatus span:last-child { margin-left: auto; color: #16a34a; }
+.structuredCanvasError { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 6px 12px; background: #fff1f2; color: #be123c; font-size: 12px; }
+.structuredCanvasError button { border: 0; background: transparent; color: inherit; cursor: pointer; }
+/* 加载/出错态是 .worksEditor（横向 flex）的直接子元素：没有 flex: 1 时宽度会收缩成
+   内容宽，转圈就贴在画布最左边。撑满父级才能让 place-content 真正居中。 */
+.structuredCanvasLoading { height: 100%; flex: 1; min-width: 0; display: grid; place-content: center; justify-items: center; gap: 12px; color: var(--text-muted, #667085); }
+.structuredCanvasLoading.error strong { color: #be123c; }
+.structuredCanvasLoading.error span { max-width: 620px; text-align: center; }
+
+/* Docks: fixed panels beside the stage instead of floating over it. The
+   component library docks on the left; the inspector and the AI assistant
+   share the right side. */
+.structuredCanvasDock { position: relative; flex: 0 0 var(--canvas-dock-width); width: var(--canvas-dock-width); height: 100%; min-height: 0; display: flex; flex-direction: column; overflow: hidden; box-sizing: border-box; border-right: 1px solid var(--border, #dde3ee); background: var(--bg-elevated, #fff); z-index: 9; }
+.structuredCanvasDockRight { border-right: 0; border-left: 1px solid var(--border, #dde3ee); }
+.structuredCanvasPalette > header { height: 48px; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 0 10px 0 14px; border-bottom: 1px solid var(--border, #e1e6ee); }
+.structuredCanvasPalette > header div { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.structuredCanvasPalette > header button { width: 28px; height: 28px; display: grid; place-items: center; border: 0; border-radius: 5px; background: transparent; color: var(--text-muted, #7a8498); cursor: pointer; }
+.structuredCanvasPalette > header button:hover { background: var(--bg-base, #f4f6f9); }
+.structuredCanvasPaletteSearch { height: 32px; flex: none; margin: 10px 12px 4px; display: flex; align-items: center; gap: 7px; padding: 0 9px; border: 1px solid var(--border, #dce2ec); border-radius: var(--canvas-radius); background: var(--bg-base, #f7f8fb); color: var(--text-muted, #8490a4); }
+.structuredCanvasPaletteSearch:focus-within { border-color: color-mix(in srgb, var(--accent, #5268e9) 55%, white); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, #5268e9) 10%, transparent); }
+.structuredCanvasPaletteSearch input { width: 100%; border: 0; outline: 0; background: transparent; color: inherit; font: inherit; font-size: 12px; }
+.structuredCanvasPaletteScroll { flex: 1; min-height: 0; overflow: auto; padding: 0 12px 16px; }
+.structuredCanvasPalette section h3 { margin: 14px 2px 7px; color: var(--text-muted, #7a8498); font-size: 11px; font-weight: 600; letter-spacing: .04em; }
+.structuredCanvasPaletteGrid { display: grid; gap: 6px; }
+.structuredCanvasPaletteGrid > button { min-height: 60px; display: flex; align-items: center; gap: 9px; padding: 8px 9px; border: 1px solid var(--border, #e0e5ed); border-radius: var(--canvas-radius); background: var(--bg-elevated, #fff); color: inherit; text-align: left; cursor: grab; transition: border-color .12s ease, background .12s ease; }
+.structuredCanvasPaletteGrid > button:hover:not(:disabled) { border-color: color-mix(in srgb, var(--accent, #5268e9) 45%, #dce2ec); background: color-mix(in srgb, var(--accent, #5268e9) 4%, #fff); }
+.structuredCanvasPaletteGrid > button:active:not(:disabled) { cursor: grabbing; }
+.structuredCanvasPaletteGrid > button:disabled { opacity: .55; cursor: wait; }
+/* Every tile is the drawn figure itself, labelled underneath. */
+.structuredCanvasPaletteGlyphs { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; }
+.structuredCanvasPaletteGlyphs > button { min-height: 0; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 7px 3px 5px; }
+.structuredCanvasPaletteGlyphs > button svg { width: 44px; height: 30px; }
+.structuredCanvasPaletteGlyphs > button small { display: block; max-width: 100%; overflow: hidden; color: var(--text-muted, #7c879b); font-size: 9.5px; line-height: 1.2; text-align: center; text-overflow: ellipsis; white-space: nowrap; -webkit-line-clamp: unset; }
+.structuredCanvasPaletteEmpty { margin: 20px 6px; color: var(--text-muted, #7a8498); font-size: 12px; }
+
+/* The inspector is always a child of the right dock, so it stretches over the
+   height the tabs leave behind. A width-based flex basis here used to cap it at
+   300px on the column axis, which made a short panel scroll inside a tall dock.
+   No z-index: as a flex item it would paint over the drawer's close button. */
+.structuredCanvasInspector, .structuredCanvasInspectorDrawer { position: relative; flex: 1 1 auto; width: 100%; height: 100%; min-height: 0; box-sizing: border-box; border: 0; background: var(--bg-elevated, #fff); }
+.structuredCanvasInspector { overflow: auto; }
+.structuredCanvasRightDock { flex: 0 0 var(--canvas-dock-width); width: var(--canvas-dock-width); height: 100%; min-height: 0; display: flex; flex-direction: column; overflow: hidden; border-left: 1px solid var(--border, #dde3ee); background: var(--bg-elevated, #fff); }
+.structuredCanvasRightDock > .structuredCanvasAiPanel { flex: 1 1 auto; width: 100%; min-height: 0; border-left: 0; }
+.structuredCanvasDockTabs { flex: none; display: flex; height: 40px; padding: 4px 8px 0; gap: 4px; border-bottom: 1px solid var(--border, #e1e6ee); background: var(--bg-elevated, #fff); }
+.structuredCanvasDockTabs button { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 5px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--text-muted, #7a8498); font-size: 12px; cursor: pointer; }
+.structuredCanvasDockTabs button.active { border-bottom-color: var(--accent, #5268e9); color: var(--accent, #5268e9); font-weight: 600; }
+/* The drawer keeps the close button pinned and hands the scrolling to the panel. */
+.structuredCanvasInspectorDrawer { display: flex; flex-direction: column; overflow: hidden; }
+.structuredCanvasInspectorDrawer > .structuredCanvasInspector { position: static; flex: 1 1 auto; width: 100%; min-height: 0; }
+.structuredCanvasDrawerClose { position: absolute; top: 10px; right: 10px; width: 28px; height: 28px; display: grid; place-items: center; border: 0; border-radius: 5px; background: transparent; color: var(--text-muted, #7a8498); cursor: pointer; z-index: 2; }
+.structuredCanvasDrawerClose:hover { background: var(--bg-base, #f4f6f9); }
+.structuredCanvasInspector > header { height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 13px; border-bottom: 1px solid var(--border, #e1e6ee); }
+.structuredCanvasInspector > header div { display: flex; align-items: center; gap: 7px; }
+.structuredCanvasInspector > header button { width: 28px; height: 28px; display: grid; place-items: center; border: 0; border-radius: 5px; background: transparent; color: var(--text-muted, #7a8498); cursor: pointer; }
+.structuredCanvasInspector > header button:hover { background: color-mix(in srgb, #dc3545 12%, transparent); }
+.structuredCanvasInspectorActions { display: flex; align-items: center; gap: 2px !important; }
+.structuredCanvasInspectorActions button:first-child { color: #dc2626; }
+.structuredCanvasInspector section { padding: 13px; border-bottom: 1px solid var(--border, #e7eaf0); }
+.structuredCanvasInspector section:last-of-type { border-bottom: 0; }
+.structuredCanvasInspector h3 { margin: 0 0 9px; color: var(--text-muted, #758096); font-size: 11px; font-weight: 600; letter-spacing: .05em; }
+.structuredCanvasInspector label { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; color: var(--text-muted, #758096); font-size: 10px; }
+.structuredCanvasInspector input:not([type='checkbox']):not([type='range']), .structuredCanvasInspector textarea, .structuredCanvasInspector select { width: 100%; box-sizing: border-box; border: 1px solid var(--border, #dce2eb); border-radius: 7px; padding: 7px 8px; outline: 0; resize: vertical; background: var(--bg-base, #f8f9fb); color: var(--text, #253047); font: inherit; font-size: 12px; }
+.structuredCanvasInspector input:focus, .structuredCanvasInspector textarea:focus { border-color: color-mix(in srgb, var(--accent, #5268e9) 55%, white); }
+.structuredCanvasInspector input[type='range'] { width: 100%; accent-color: var(--accent, #5268e9); }
+.structuredCanvasInspectorCheck { flex-direction: row !important; align-items: center; }
+.structuredCanvasInspectorCheck span { display: inline-flex; align-items: center; gap: 5px; }
+.structuredCanvasInspectorRow { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.structuredCanvasConnectorInspector label, .structuredCanvasConnectorPosition > span { font-size: 11px; }
+.structuredCanvasConnectorInspector h3 { color: var(--text, #253047); font-size: 12px; letter-spacing: 0; }
+.structuredCanvasConnectorInspector .structuredCanvasOptionGrid { margin-bottom: 12px; }
+.structuredCanvasConnectorPosition > span { display: block; margin-bottom: 6px; color: var(--text-muted, #758096); }
+.structuredCanvasInspector input[type='color'] { width: 100%; height: 30px; box-sizing: border-box; padding: 2px; border: 1px solid var(--border, #dce2eb); border-radius: 7px; background: var(--bg-base, #f8f9fb); cursor: pointer; }
+
+/* 画布设置：一行一个字段，标题在左、控件在右。控件只存在两种规格 ——
+   92×30 的数值框与颜色框（同一边框、圆角、底色）和 18×18 的对号勾选框 ——
+   右边缘对齐，标题不再有的带图标有的不带，整列读起来才是整齐的。 */
+.structuredCanvasInspector .structuredCanvasSettingsField { flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; min-height: 34px; margin-bottom: 0; color: var(--text, #253047); font-size: 12px; }
+.structuredCanvasSettingsField > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.structuredCanvasInspector .structuredCanvasSettingsField input:not([type='checkbox']):not([type='range']) { flex: none; width: 92px; height: 30px; box-sizing: border-box; padding: 0 9px; border-radius: 8px; text-align: right; font-variant-numeric: tabular-nums; appearance: textfield; }
+.structuredCanvasInspector .structuredCanvasSettingsField input::-webkit-inner-spin-button, .structuredCanvasInspector .structuredCanvasSettingsField input::-webkit-outer-spin-button { margin: 0; appearance: none; }
+.structuredCanvasInspector .structuredCanvasSettingsField .uiColorTrigger { justify-content: flex-end; width: 92px; min-width: 92px; height: 30px; box-sizing: border-box; padding: 0 9px; gap: 6px; border-color: var(--border, #dce2eb); border-radius: 8px; background: var(--bg-base, #f8f9fb); }
+.structuredCanvasInspector .structuredCanvasSettingsField .uiColorTrigger .uiColorTriggerSwatch { width: 16px; height: 16px; border-radius: 4px; }
+.structuredCanvasInspector .structuredCanvasSettingsField .uiColorTriggerValue { color: var(--text-muted, #758096); font-size: 11px; }
+/* 勾选框：自己画一个带对号的方框，三个布尔项同一规格，右边缘对齐。
+   对号是“右边框 + 下边框”的⌋旋转 45° 得来的，所以它必须竖长（高大于宽）：
+   写成宽大于高得就不是 ✓ 而是朝右的尖角。旋转后的墨迹偏下 2px，
+   平移写在 rotate 左边（作用于屏幕坐标系）才能把它抬回视觉中心。 */
+.structuredCanvasSettingsField input[type='checkbox'] { flex: none; display: grid; place-items: center; width: 18px; height: 18px; box-sizing: border-box; margin: 0; padding: 0; border: 1px solid var(--border, #dce2eb); border-radius: 5px; background: var(--bg-base, #f8f9fb); appearance: none; cursor: pointer; transition: background .12s ease, border-color .12s ease; }
+.structuredCanvasSettingsField input[type='checkbox']::after { content: ''; width: 4px; height: 8px; border: solid #fff; border-width: 0 2px 2px 0; opacity: 0; transform: translate(0, -2px) rotate(45deg); }
+.structuredCanvasSettingsField input[type='checkbox']:checked { border-color: var(--accent, #5268e9); background: var(--accent, #5268e9); }
+.structuredCanvasSettingsField input[type='checkbox']:checked::after { opacity: 1; transform: translate(0, -2px) rotate(45deg); }
+
+
+.structuredCanvasShapeGroup + .structuredCanvasShapeGroup { margin-top: 10px; }
+.structuredCanvasShapeGroup h4 { margin: 0 0 6px; color: var(--text-muted, #8a94a6); font-size: 10px; font-weight: 600; }
+.structuredCanvasShapeGroup summary { cursor: pointer; color: var(--text-muted, #8a94a6); font-size: 10px; font-weight: 600; }
+.structuredCanvasShapeGroup[open] summary { margin-bottom: 6px; }
+.structuredCanvasShapePicker { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+.structuredCanvasShapePicker button { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 5px 2px 4px; border: 1px solid var(--border, #dce2eb); border-radius: var(--canvas-radius); background: var(--bg-elevated, #fff); color: var(--text-muted, #7a8498); cursor: pointer; }
+.structuredCanvasShapePicker button.active { border-color: color-mix(in srgb, var(--accent, #5268e9) 55%, #dce2ec); color: var(--accent, #5268e9); background: color-mix(in srgb, var(--accent, #5268e9) 8%, transparent); }
+.structuredCanvasShapePicker svg { width: 100%; height: 28px; }
+.structuredCanvasShapePicker small { overflow: hidden; max-width: 100%; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+/* 三选一的短选项行（如连线路径）：与 ShapePicker 同款式 */
+.structuredCanvasOptionGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-bottom: 11px; }
+.structuredCanvasOptionGrid button { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 7px 4px; border: 1px solid var(--border, #dce2eb); border-radius: 9px; background: var(--bg-elevated, #fff); color: var(--text-muted, #7a8498); cursor: pointer; }
+.structuredCanvasOptionGrid button.active { border-color: color-mix(in srgb, var(--accent, #5268e9) 55%, #dce2ec); color: var(--accent, #5268e9); background: color-mix(in srgb, var(--accent, #5268e9) 8%, transparent); }
+.structuredCanvasOptionGrid small { font-size: 10px; }
+
+/* The shape offer that opens from the arrows beside a selected component: the
+   library's glyph tiles, floated next to the arrow that opened them. */
+.structuredCanvasQuickShapes { position: absolute; z-index: 15; width: 212px; padding: 7px 8px 8px; border: 1px solid color-mix(in srgb, var(--border, #d8deea) 88%, transparent); border-radius: 9px; background: color-mix(in srgb, var(--bg-elevated, #fff) 97%, transparent); box-shadow: 0 10px 28px rgba(31, 42, 68, .2); }
+.structuredCanvasQuickShapesTitle { display: block; margin: 0 2px 6px; color: var(--text-muted, #7a8498); font-size: 10px; font-weight: 600; letter-spacing: .04em; }
+.structuredCanvasQuickShapesGrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; }
+.structuredCanvasQuickShapesGrid button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 0; padding: 6px 2px 4px; border: 1px solid var(--border, #e0e5ed); border-radius: var(--canvas-radius); background: var(--bg-elevated, #fff); color: var(--text-muted, #7a8498); cursor: pointer; transition: border-color .12s ease, background .12s ease; }
+.structuredCanvasQuickShapesGrid button:hover:not(:disabled),
+.structuredCanvasQuickShapesGrid button[aria-current] { border-color: color-mix(in srgb, var(--accent, #5268e9) 50%, #dce2ec); background: color-mix(in srgb, var(--accent, #5268e9) 6%, #fff); color: var(--accent, #5268e9); }
+.structuredCanvasQuickShapesGrid button:disabled { opacity: .55; cursor: wait; }
+.structuredCanvasQuickShapesGrid svg { width: 40px; height: 27px; }
+.structuredCanvasQuickShapesGrid small { display: block; max-width: 100%; overflow: hidden; font-size: 9px; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
+
+/* 选中组件四边的候选箭头，以及画布上的候选图形预览。
+   箭头按 1/zoom 反缩放，屏幕上永远是 22px；预览是真实尺寸，跟着画布缩放走。 */
+.structuredCanvasQuickShapeLayer { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
+.structuredCanvasQuickShapeArrow {
+  position: absolute; display: grid; place-items: center;
+  width: 22px; height: 22px; padding: 0;
+  border: 1px solid color-mix(in srgb, var(--border, #d8deea) 80%, transparent);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--bg-elevated, #fff) 94%, transparent);
+  color: var(--text-muted, #8b95a7);
+  box-shadow: 0 1px 3px rgba(31, 42, 68, .12);
+  cursor: pointer; pointer-events: auto;
+  transition: background .12s ease, border-color .12s ease, color .12s ease;
+}
+.structuredCanvasQuickShapeArrow:hover,
+.structuredCanvasQuickShapeArrow[data-active] {
+  border-color: var(--accent, #5268e9);
+  background: var(--accent, #5268e9);
+  color: #fff;
+}
+.structuredCanvasQuickShapeGhost {
+  position: absolute; padding: 0; border: 0; background: transparent;
+  color: var(--accent, #c04b3f);
+  cursor: pointer; pointer-events: auto;
+}
+.structuredCanvasQuickShapeGhost svg { display: block; width: 100%; height: 100%; }
+.structuredCanvasQuickShapeGhost:hover { filter: drop-shadow(0 0 4px color-mix(in srgb, currentColor 45%, transparent)); }
+
+/* In-place editing: the displayed element itself becomes the editable surface.
+   The field carries the component's own display classes, so this base class
+   only supplies the caret and neutralizes React Flow's selection lock — no
+   second box, no panel chrome. */
+.structuredCanvasInlineText { display: inline-block; box-sizing: border-box; min-width: 1ch; max-width: 100%; border: 0; outline: 0; background: transparent; color: inherit; font: inherit; text-align: inherit; white-space: pre-wrap; overflow-wrap: anywhere; cursor: text; caret-color: var(--accent, #5b6ee8); -webkit-user-select: text; user-select: text; }
+.structuredCanvasInlineText:empty::before { content: attr(data-placeholder); color: color-mix(in srgb, currentColor 42%, transparent); pointer-events: none; }
+.structuredCanvasFill { width: 100%; height: 100%; }
+.structuredCanvasFillX { width: 100%; }
+/* The display label ignores the pointer so the shape beneath stays draggable;
+   while editing the caret needs it back. */
+.structuredCanvasShapeLabel.isEditing { pointer-events: auto; }
+.structuredCanvasNode.editing { cursor: text; }
+
+/* Ports stay out of the way until the component is hovered, and appear
+   canvas-wide while a connection is being dragged so there is somewhere
+   visible to drop it. A *selected* component hides them on purpose: its border
+   belongs to the resize handles (see below). The hit box is centered on the
+   border point (xyflow's per-side handle classes would otherwise push
+   right/bottom handles fully outside the node, dragging the edge anchor with
+   them), and the visible part is a small solid dot sitting on the component's
+   border. Its size is set from `portHitSize` in CanvasConnectorEdge, because
+   that is the box React Flow measures a connector's endpoint from; declaring
+   it here as well would let the two drift apart and re-open the gap between a
+   connector and its shape. */
+.structuredCanvasStage .react-flow__handle.structuredCanvasPort {
+  border: 0; border-radius: 50%; background: transparent;
+  transform: translate(-50%, -50%);
+  opacity: 0; visibility: hidden; pointer-events: none; cursor: crosshair;
+  transition: opacity .12s ease;
+}
+.structuredCanvasStage .react-flow__handle.structuredCanvasPort.react-flow__handle-top,
+.structuredCanvasStage .react-flow__handle.structuredCanvasPort.react-flow__handle-bottom,
+.structuredCanvasStage .react-flow__handle.structuredCanvasPort.react-flow__handle-left,
+.structuredCanvasStage .react-flow__handle.structuredCanvasPort.react-flow__handle-right {
+  right: auto; bottom: auto; transform: translate(-50%, -50%);
+}
+.structuredCanvasStage .react-flow__handle.structuredCanvasPort::after {
+  content: ''; position: absolute; inset: 6px; box-sizing: border-box;
+  border: 0; border-radius: 50%; background: var(--accent, #5b6ee8);
+  transition: transform .12s ease;
+}
+.structuredCanvasStage .react-flow__node:hover .structuredCanvasPort.isNearest,
+.structuredCanvasStage.isConnecting .react-flow__handle.structuredCanvasPort {
+  opacity: 1; visibility: visible; pointer-events: auto;
+}
+/* 选中时，边中点是缩放手柄的地盘：draw.io 也是这么分工 —— 拖边中点只改一个轴，
+   拖角同时改两个轴。端口（18px 命中区）压在 24px 的缩放手柄上面，不挪开的话
+   拖边中点永远是「拉一条线」，改不了宽度。 */
+.structuredCanvasStage .react-flow__node.selected .react-flow__handle.structuredCanvasPort {
+  opacity: 0; visibility: hidden; pointer-events: none;
+}
+/* 拉线的过程中端口全部回来，好让人看见能落到哪。 */
+.structuredCanvasStage.isConnecting .react-flow__node.selected .react-flow__handle.structuredCanvasPort {
+  opacity: 1; visibility: visible; pointer-events: auto;
+}
+.structuredCanvasStage .react-flow__resize-control.line.structuredCanvasResizeLine:is(.top, .bottom) { cursor: ns-resize; }
+.structuredCanvasStage .react-flow__resize-control.line.structuredCanvasResizeLine:is(.left, .right) { cursor: ew-resize; }
+.structuredCanvasStage .react-flow__handle.structuredCanvasPort:hover::after { transform: scale(1.45); }
+.structuredCanvasStage .react-flow__node.editing .structuredCanvasPort { display: none; }
+.structuredCanvasStage .react-flow__edges { z-index: 1 !important; pointer-events: none; }
+.structuredCanvasStage .react-flow__edgelabel-renderer { z-index: 4; }
+.structuredCanvasStage .react-flow__nodes { z-index: 2; }
+.structuredCanvasStage .react-flow__edge-path { stroke-linecap: round; stroke-linejoin: round; }
+.structuredCanvasStage .react-flow__edge { pointer-events: all; }
+.structuredCanvasEdgeDragPath { cursor: move; pointer-events: stroke; touch-action: none; }
+.structuredCanvasStage .react-flow__edge.selected .react-flow__edge-path { stroke: var(--accent, #5b6ee8) !important; }
+.structuredCanvasStage .react-flow__edge-marker { overflow: visible; }
+.structuredCanvasEdgeControl { position: absolute; z-index: 3; width: 14px; height: 14px; box-sizing: border-box; padding: 0; border: 2px solid #fff; border-radius: 50%; background: var(--accent, #5b6ee8); box-shadow: 0 1px 5px rgba(31,42,68,.28); cursor: move; pointer-events: all; touch-action: none; }
+.structuredCanvasEdgeControl:hover { transform-origin: center; box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, #5b6ee8) 18%, transparent), 0 1px 5px rgba(31,42,68,.28); }
+.structuredCanvasRoughMarker { fill: none; }
+.structuredCanvasEdgeLabel { position: absolute; z-index: 2; top: 0; left: 0; padding: 0 3px; border: 0; border-radius: 0; background: transparent; box-shadow: none; line-height: 1.4; white-space: pre; pointer-events: none; }
+.structuredCanvasEdgeLabel.selected { pointer-events: auto; cursor: text; }
+.structuredCanvasEdgeLabel.handDrawn { font-family: "LXGW WenKai", "Segoe Print", "KaiTi", "STKaiti", cursive; }
+.structuredCanvasEdgeLabelButton { position: absolute; display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border: 1px solid var(--border, #dde3ee); border-radius: 7px; background: var(--bg-elevated, #fff); color: var(--text, #253047); box-shadow: 0 3px 8px rgba(33, 42, 73, .08); font-size: 11px; line-height: 1; white-space: nowrap; cursor: pointer; pointer-events: all; }
+.structuredCanvasEdgeLabelButton:hover { border-color: var(--accent, #5b6ee8); color: var(--accent, #5b6ee8); }
+.structuredCanvasEdgeLabelEditor { position: absolute; pointer-events: all; }
+.structuredCanvasEdgeLabelEditor input { width: max(150px, 10em); min-height: 28px; box-sizing: border-box; padding: 2px 9px; border: 1px solid var(--accent, #5b6ee8); border-radius: 7px; outline: none; background: var(--bg-elevated, #fff); color: inherit; font: inherit; line-height: 1.4; box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, #5b6ee8) 16%, transparent), 0 4px 10px rgba(33, 42, 73, .12); }
+.structuredCanvasInspectorType code { overflow: hidden; padding: 6px 7px; border-radius: 6px; background: var(--bg-base, #f4f6f9); color: #596579; font-size: 10px; text-overflow: ellipsis; }
+.structuredCanvasInspector p { margin: 4px 0 0; color: var(--text-muted, #7a8498); font-size: 10px; line-height: 1.5; }
+
+.structuredCanvasText { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 14px 16px; border: 1px solid transparent; border-radius: var(--canvas-radius); background: rgba(255,255,255,.82); color: var(--canvas-ink, #202536); font-size: 18px; line-height: 1.55; white-space: pre-wrap; }
+/* An inline icon is a character whose glyph happens to be drawn: it keeps the
+   line box, scales with the font, and never becomes a block of its own. */
+.structuredCanvasInlineIcon { display: inline-flex; align-items: center; justify-content: center; margin: 0 .06em; line-height: 1; vertical-align: -.18em; }
+.structuredCanvasInlineIcon svg { display: block; width: 1.1em; height: 1.1em; }
+.structuredCanvasTextBody { min-width: 0; white-space: pre-wrap; }
+.structuredCanvasInlineText.structuredCanvasTextBody { display: inline-block; text-align: inherit; }
+.structuredCanvasShape { position: relative; width: 100%; height: 100%; box-sizing: border-box; }
+.structuredCanvasShapeSurface { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.structuredCanvasShapeLabel { position: absolute; inset: 0; display: grid; place-items: center; padding: clamp(4px, 8%, 14px); overflow: hidden; color: #475569; font-weight: 600; text-align: center; white-space: pre-wrap; line-height: 1.2; pointer-events: none; }
+/* The grid centres this one inline box; icon and text flow inside it, so the
+   glyph shares a line with the label instead of becoming a row above it. */
+.structuredCanvasShapeText { display: inline; max-width: 100%; overflow-wrap: anywhere; }
+/* A triangle's usable area is its lower half, so centred text overflows the apex. */
+.structuredCanvasShape[data-canvas-shape='triangle'] .structuredCanvasShapeLabel,
+.structuredCanvasShape[data-canvas-shape='manualInput'] .structuredCanvasShapeLabel { padding: clamp(12px, 25%, 40px) 16% 8%; }
+.structuredCanvasShape[data-canvas-shape='merge'] .structuredCanvasShapeLabel,
+.structuredCanvasShape[data-canvas-shape='offPage'] .structuredCanvasShapeLabel { padding: 8% 16% clamp(12px, 25%, 40px); }
+.structuredCanvasShape[data-canvas-shape='cylinder'] .structuredCanvasShapeLabel { padding: clamp(10px, 20%, 32px) 12% 12%; }
+.structuredCanvasShape[data-canvas-shape='callout'] .structuredCanvasShapeLabel { padding: 6% 10% clamp(12px, 24%, 30px); }
+.structuredCanvasShape[data-canvas-shape='arrowRight'] .structuredCanvasShapeLabel { padding: 6% 30% 6% 8%; }
+.structuredCanvasShape[data-canvas-shape='arrowDouble'] .structuredCanvasShapeLabel { padding: 6% 26%; }
+.structuredCanvasShape[data-canvas-shape='cube'] .structuredCanvasShapeLabel,
+.structuredCanvasShape[data-canvas-shape='umlNode'] .structuredCanvasShapeLabel { padding: clamp(14px, 26%, 34px) clamp(14px, 26%, 34px) 8% 8%; }
+/* Compartmented UML figures name themselves in the top compartment. */
+.structuredCanvasShape[data-canvas-shape='umlClass'] .structuredCanvasShapeLabel { inset: 0 0 auto; height: clamp(30px, 30%, 44px); padding: 0 8px; }
+.structuredCanvasShape[data-canvas-shape='umlInterface'] .structuredCanvasShapeLabel { inset: 0 0 auto; height: clamp(38px, 40%, 56px); padding: 0 8px; font-size: .92em; }
+.structuredCanvasShape[data-canvas-shape='umlLifeline'] .structuredCanvasShapeLabel { inset: 0 0 auto; height: clamp(34px, 16%, 52px); padding: 0 8px; }
+.structuredCanvasShape[data-canvas-shape='umlPackage'] .structuredCanvasShapeLabel { padding-top: clamp(16px, 18%, 26px); }
+.structuredCanvasShape[data-canvas-shape='umlNote'] .structuredCanvasShapeLabel { place-items: start; padding: 10px 12px; text-align: left; font-weight: 500; }
+.structuredCanvasShape[data-canvas-shape='umlComponent'] .structuredCanvasShapeLabel { padding-left: 18%; }
+.structuredCanvasShape[data-canvas-shape='erKeyAttribute'] .structuredCanvasShapeLabel { text-decoration: underline; text-underline-offset: 3px; }
+.structuredCanvasShape[data-canvas-shape='erDerivedAttribute'] .structuredCanvasShapeLabel { font-weight: 500; font-style: italic; }
+/* Solid glyphs (actor, initial state) have no interior; the name hangs below. */
+.structuredCanvasShape[data-canvas-shape='umlActor'] .structuredCanvasShapeLabel,
+.structuredCanvasShape[data-canvas-shape='umlInitial'] .structuredCanvasShapeLabel,
+.structuredCanvasShape[data-canvas-shape='umlFinal'] .structuredCanvasShapeLabel,
+.structuredCanvasShape[data-canvas-shape='umlFlowFinal'] .structuredCanvasShapeLabel,
+.structuredCanvasShape[data-canvas-shape='umlHistory'] .structuredCanvasShapeLabel,
+.structuredCanvasShape[data-canvas-shape='umlBoundary'] .structuredCanvasShapeLabel,
+.structuredCanvasShape[data-canvas-shape='umlControl'] .structuredCanvasShapeLabel,
+.structuredCanvasShape[data-canvas-shape='umlEntity'] .structuredCanvasShapeLabel,
+.structuredCanvasShape[data-canvas-shape='umlLollipop'] .structuredCanvasShapeLabel,
+.structuredCanvasShape[data-canvas-shape='umlSocket'] .structuredCanvasShapeLabel,
+.structuredCanvasShape[data-canvas-shape='umlDestruction'] .structuredCanvasShapeLabel,
+.structuredCanvasShape[data-canvas-shape='sequentialData'] .structuredCanvasShapeLabel { inset: 100% -40px auto; height: auto; padding: 4px 0 0; overflow: visible; white-space: nowrap; font-weight: 500; }
+.structuredCanvasShape[data-canvas-shape='umlActivation'] .structuredCanvasShapeLabel,
+.structuredCanvasShape[data-canvas-shape='umlFork'] .structuredCanvasShapeLabel { display: none; }
+/* Header bands: tables, swimlanes and sequence-diagram fragments name themselves in the band. */
+.structuredCanvasShape[data-canvas-shape='erTable'] .structuredCanvasShapeLabel { inset: 0 0 auto; height: clamp(30px, 24%, 40px); padding: 0 8px; }
+.structuredCanvasShape[data-canvas-shape='umlSwimlane'] .structuredCanvasShapeLabel { inset: 0 0 auto; height: clamp(30px, 10%, 44px); padding: 0 8px; }
+.structuredCanvasShape[data-canvas-shape='umlSwimlaneH'] .structuredCanvasShapeLabel { inset: 0 auto 0 0; width: clamp(32px, 12%, 60px); padding: 8px 4px; writing-mode: vertical-rl; text-orientation: mixed; }
+.structuredCanvasShape[data-canvas-shape='umlFrame'] .structuredCanvasShapeLabel { inset: 0 auto auto 0; width: clamp(46px, 22%, 120px); height: clamp(20px, 14%, 30px); padding: 0 12px 0 8px; font-style: italic; }
+.structuredCanvasShape[data-canvas-shape='umlObject'] .structuredCanvasShapeLabel { text-decoration: underline; text-underline-offset: 3px; }
+.structuredCanvasShape[data-canvas-shape='annotation'] .structuredCanvasShapeLabel { place-items: center start; padding-left: 14%; text-align: left; font-weight: 500; }
+.structuredCanvasShape[data-canvas-shape='chevron'] .structuredCanvasShapeLabel { padding: 6% 22%; }
+.structuredCanvasShape[data-canvas-shape='transfer'] .structuredCanvasShapeLabel,
+.structuredCanvasShape[data-canvas-shape='umlSendSignal'] .structuredCanvasShapeLabel { padding: 6% 22% 6% 8%; }
+.structuredCanvasShape[data-canvas-shape='umlReceiveSignal'] .structuredCanvasShapeLabel { padding: 6% 8% 6% 22%; }
+.structuredCanvasShape[data-canvas-shape='internalStorage'] .structuredCanvasShapeLabel { padding: 20% 8% 8% 20%; }
+.structuredCanvasShape[data-canvas-shape='rightTriangle'] .structuredCanvasShapeLabel { padding: 30% 30% 8% 8%; }
+.structuredCanvasShape[data-canvas-shape='moon'] .structuredCanvasShapeLabel { padding: 20% 45% 20% 12%; }
+.structuredCanvasShape[data-canvas-shape='connector'] .structuredCanvasShapeLabel { padding: 2px; font-size: .8em; }
+.canvasShapeStroke { transition: stroke .14s ease; }/* Cut the paper itself along the crease{
+  content: '';
+  position: absolute;
+  z-index: 2;
+  top: -1px;
+  left: calc(100% - var(--note-fold-size));
+  width: 43px;
+  height: 1px;
+  background: rgba(71,62,29,.28);
+  box-shadow: 0 2px 3px rgba(71,62,29,.2);
+  transform: rotate(45deg);
+  transform-origin: left center;
+  pointer-events: none;
+}/* The caption fades out of a gradient scrim instead of sitting on a solid bar{
+  position: absolute; inset: auto 0 0;
+  padding: 28px 10px 8px;
+  overflow: hidden; color: #fff;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0), rgba(15, 23, 42, .62));
+  font-size: 12px; line-height: 1.4;
+  text-overflow: ellipsis; white-space: nowrap;
+  pointer-events: none;
+}/* Collection views use the same soft surfaces, compact typography and indigo
+   accent as the rest of the canvas. All data-view chrome is class-based here
+   so table{ width: 100%; height: 100%; min-width: 0; min-height: 0; overflow: hidden; box-sizing: border-box; border: 1px solid var(--canvas-surface-border); border-radius: var(--canvas-radius); background: var(--canvas-surface); color: var(--canvas-ink); box-shadow: none; font-size: 14px; }
+
+/* width: max-content is load-bearing: an auto-width box positioned with only
+   `left: 50%` shrink-to-fits into half the stage, so opening both docks squeezed
+   the toolbar and wrapped the two-character labels vertically inside the buttons. */
+.structuredCanvasBottomToolbar { position: absolute; z-index: 10; left: 50%; bottom: 14px; width: max-content; max-width: calc(100% - 20px); height: 46px; display: flex; justify-content: center; align-items: center; gap: 3px; padding: 4px; border: 1px solid color-mix(in srgb, var(--border, #d8deea) 92%, transparent); border-radius: 8px; background: color-mix(in srgb, var(--bg-elevated, #fff) 96%, transparent); box-shadow: 0 10px 30px rgba(31,42,68,.18); transform: translateX(-50%); }
+.structuredCanvasBottomToolbar button { flex: none; min-width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; gap: 5px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; color: var(--text-muted, #657086); cursor: pointer; }
+.structuredCanvasBottomToolbar button span { font-size: 11px; }
+.structuredCanvasBottomToolbar button:hover:not(:disabled), .structuredCanvasBottomToolbar button.active { color: var(--accent, #4f67e8); background: color-mix(in srgb, var(--accent, #4f67e8) 10%, transparent); }
+.structuredCanvasBottomToolbar button:disabled { opacity: .35; cursor: default; }
+.structuredCanvasBottomToolbar button.danger { color: #dc3545; }
+.structuredCanvasBottomToolbar .divider { flex: none; width: 1px; height: 25px; margin: 0 2px; background: var(--border, #d8deea); }
+/* The armed tool's settings, in a bar of their own just above the toolbar: they
+   are wider than the toolbar has room for, and they only mean anything while
+   that tool is the one holding the pointer. */
+.structuredCanvasToolOptions { position: absolute; z-index: 10; left: 50%; bottom: 68px; width: max-content; max-width: calc(100% - 20px); min-height: 38px; display: flex; align-items: center; gap: 10px; padding: 5px 12px; border: 1px solid color-mix(in srgb, var(--border, #d8deea) 92%, transparent); border-radius: 8px; background: color-mix(in srgb, var(--bg-elevated, #fff) 96%, transparent); box-shadow: 0 10px 30px rgba(31,42,68,.18); transform: translateX(-50%); }
+.structuredCanvasToolOptions .divider { flex: none; width: 1px; height: 22px; background: var(--border, #d8deea); }
+.structuredCanvasToolRange { display: inline-flex; align-items: center; gap: 7px; color: var(--text-muted, #657086); font-size: 11px; }
+.structuredCanvasToolRange input[type='range'] { width: 96px; height: 14px; margin: 0; accent-color: var(--accent, #4f67e8); cursor: pointer; }
+.structuredCanvasToolRange output { min-width: 22px; color: var(--text, #2b3445); font-size: 11px; font-variant-numeric: tabular-nums; }
+.structuredCanvasToolColors { display: inline-flex; align-items: center; gap: 5px; }
+.structuredCanvasToolColors button { width: 20px; height: 20px; padding: 0; border: 1px solid rgba(20,28,48,.18); border-radius: 50%; cursor: pointer; }
+.structuredCanvasToolColors button.active { box-shadow: 0 0 0 2px var(--bg-elevated, #fff), 0 0 0 4px var(--accent, #4f67e8); }
+/* A drawing keeps its own ink: the svg is the element box at 1:1 and the path is
+   drawn in the element's own coordinates, so the stroke never scales or skews
+   when the box is resized — it just gets more room around it. */
+.structuredCanvasDrawing { display: block; overflow: visible; pointer-events: none; }
+/* A stroke has no chrome of its own to take the accent, so selection reads as a
+   dashed frame around its box. The floating toolbar above it is the other half
+   of the signal, and the resize handles sit on that same box. */
+.structuredCanvasNode.selected .structuredCanvasDrawing { outline: 1px dashed var(--accent, #5b6ee8); outline-offset: 3px; }
+/* The live stroke and the eraser's reach. Both ride inside the React Flow
+   viewport, so they pan and zoom with the canvas for free. */
+.structuredCanvasDrawingLayer { position: absolute; z-index: 1000; top: 0; left: 0; width: 0; height: 0; overflow: visible; pointer-events: none; }
+.structuredCanvasDrawingDraft { position: absolute; display: block; overflow: visible; opacity: .85; }
+.structuredCanvasEraserCursor { position: absolute; display: block; border: 1px solid color-mix(in srgb, var(--accent, #4f67e8) 62%, transparent); border-radius: 50%; background: color-mix(in srgb, var(--accent, #4f67e8) 12%, transparent); }
+/* With a tool armed the pointer is a drawing instrument, not a camera. */
+.structuredCanvasStage.tool-pen, .structuredCanvasStage.tool-pen .react-flow__pane { cursor: crosshair; }
+.structuredCanvasStage.tool-eraser, .structuredCanvasStage.tool-eraser .react-flow__pane { cursor: cell; }
+:root[data-theme='dark'] .structuredCanvasToolOptions { border-color: #343844; background: #20232b; }
+:root[data-theme='dark'] .structuredCanvasToolRange output { color: #edf1f7; }
+:root[data-theme='dark'] .structuredCanvasToolColors button.active { box-shadow: 0 0 0 2px #20232b, 0 0 0 4px var(--accent, #6d84f0); }
+.structuredCanvasStatusBar { height: 28px; flex: none; display: flex; align-items: center; gap: 8px; box-sizing: border-box; padding: 0 10px; border-top: 1px solid var(--border, #dde3ee); background: var(--bg-elevated, #fff); color: var(--text-muted, #758096); font-size: 11px; }
+.structuredCanvasZoomControls { margin-left: auto; height: 24px; display: flex; align-items: center; }
+.structuredCanvasZoomControls button { height: 22px; min-width: 25px; display: grid; place-items: center; padding: 0 5px; border: 0; border-radius: 4px; background: transparent; color: inherit; cursor: pointer; }
+.structuredCanvasZoomControls button:hover { color: var(--accent, #5268e7); background: color-mix(in srgb, var(--accent, #5268e7) 9%, transparent); }
+.structuredCanvasZoomControls .zoomValue { min-width: 48px; font-size: 10px; }
+
+/* AI assistant dock. The chat chrome (toolbar, bubbles, composer) comes from
+   features/ai/chat/ai-chat-kit.css so it matches the article editor; only the
+   plan card ("draw this on the canvas") and the starter chips are canvas-specific. */
+.structuredCanvasAiPanel { --canvas-dock-width: 340px; }
+.structuredCanvasAiSelection { flex: none; margin: 8px 12px 0; padding: 7px 9px; border: 1px solid color-mix(in srgb, var(--accent, #5268e9) 35%, var(--border, #dce2eb)); border-radius: var(--canvas-radius); background: color-mix(in srgb, var(--accent, #5268e9) 8%, var(--bg-elevated, #fff)); color: var(--accent, #5268e9); font-size: 11px; }
+.structuredCanvasAiPanel .aiChatToolbar { flex: none; }
+.structuredCanvasAiMessages { min-height: 0; flex: 1; gap: 20px; overflow: auto; padding: 14px 12px 20px; scrollbar-gutter: stable; }
+.structuredCanvasAiPlan { margin-top: 8px; padding: 9px; border: 1px solid color-mix(in srgb, var(--accent, #5268e9) 32%, var(--border, #dce2eb)); border-radius: var(--canvas-radius); background: color-mix(in srgb, var(--accent, #5268e9) 6%, var(--bg-elevated, #fff)); }
+.structuredCanvasAiCounts { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.structuredCanvasAiCounts span { padding: 2px 8px; border-radius: 999px; background: color-mix(in srgb, var(--accent, #5268e9) 12%, transparent); color: var(--accent, #5268e9); font-size: 11px; font-weight: 600; }
+.structuredCanvasAiApply { width: 100%; height: 32px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 0; border-radius: var(--canvas-radius); background: var(--accent, #5268e9); color: #fff; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+.structuredCanvasAiApply:hover:not(:disabled) { filter: brightness(1.06); }
+.structuredCanvasAiApply:disabled { opacity: .55; cursor: wait; }
+.structuredCanvasAiExamples { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 0 0 40px; }
+.structuredCanvasAiExamples button { height: 28px; padding: 0 10px; border: 1px solid var(--border, #dce2eb); border-radius: 999px; background: var(--bg-elevated, #fff); color: var(--text-muted, #66718a); font: inherit; font-size: 11px; cursor: pointer; }
+.structuredCanvasAiExamples button:hover:not(:disabled) { border-color: color-mix(in srgb, var(--accent, #5268e9) 50%, #dce2eb); color: var(--accent, #5268e9); background: color-mix(in srgb, var(--accent, #5268e9) 6%, #fff); }
+.structuredCanvasAiExamples button:disabled { opacity: .55; }
+
+:root[data-theme='dark'] .structuredCanvasEditor { --canvas-surface: #252933; --canvas-surface-border: #3a404d; --canvas-surface-divider: #343844; --canvas-ink: #edf1f7; --canvas-ink-muted: #aab2c1; background: #17191f; }
+:root[data-theme='dark'] .structuredCanvasStage { background: color-mix(in srgb, var(--canvas-background, #17191f) 12%, #17191f); }
+:root[data-theme='dark'] .structuredCanvasDock, :root[data-theme='dark'] .structuredCanvasHeader, :root[data-theme='dark'] .structuredCanvasBottomToolbar, :root[data-theme='dark'] .structuredCanvasStatusBar { background: #20232b; border-color: #343844; }
+:root[data-theme='dark'] .structuredCanvasInspector, :root[data-theme='dark'] .structuredCanvasInspectorDrawer { background: #20232b; border-color: #343844; }
+:root[data-theme='dark'] .structuredCanvasPaletteGrid > button, :root[data-theme='dark'] .structuredCanvasAiExamples button { background: #252933; border-color: #373c49; color: #dbe1ea; }
+:root[data-theme='dark'] .structuredCanvasPaletteIcon { background: #343a55; color: #aebaff; }
+:root[data-theme='dark'] .structuredCanvasPaletteGlyphs > button svg, :root[data-theme='dark'] .structuredCanvasShapePicker svg { filter: invert(.9) hue-rotate(180deg); }
+:root[data-theme='dark'] .structuredCanvasAiPlan { background: #2a2f3d; border-color: #46507a; }
+:root[data-theme='dark'] .structuredCanvasHeader, :root[data-theme='dark'] .structuredCanvasDock, :root[data-theme='dark'] .structuredCanvasInspector { color: #edf1f7; }
+:root[data-theme='dark'] .structuredCanvasTitle small, :root[data-theme='dark'] .structuredCanvasPalette section h3, :root[data-theme='dark'] .structuredCanvasPaletteGrid small, :root[data-theme='dark'] .structuredCanvasInspector h3, :root[data-theme='dark'] .structuredCanvasInspector label, :root[data-theme='dark'] .structuredCanvasInspector p, :root[data-theme='dark'] .structuredCanvasStatus { color: #aab2c1; }
+:root[data-theme='dark'] .structuredCanvasPaletteSearch, :root[data-theme='dark'] .structuredCanvasInspector input:not([type='checkbox']):not([type='range']), :root[data-theme='dark'] .structuredCanvasInspector textarea, :root[data-theme='dark'] .structuredCanvasOptionGrid button, :root[data-theme='dark'] .structuredCanvasShapePicker button { color: #dbe1ea; background: #1b1e25; border-color: #3a404d; color-scheme: dark; }
+:root[data-theme='dark'] .structuredCanvasPaletteSearch input::placeholder { color: #7f899a; }
+:root[data-theme='dark'] .structuredCanvasSettingsField input[type='checkbox'], :root[data-theme='dark'] .structuredCanvasSettingsField .uiColorTrigger { background: #1b1e25; border-color: #3a404d; }
+:root[data-theme='dark'] .structuredCanvasText { background: #252933; color: #edf1f7; border-color: #3a404d; }
+/* 错误态与骨架屏原本写死浅色底，深色下会变成一块亮斑 */
+:root[data-theme='dark'] .structuredCanvasUnknown,
+:root[data-theme='dark'] .structuredCanvasError { background: color-mix(in srgb, #ef4444 16%, #252933); color: #f7a3a3; }
+:root[data-theme='dark'] .structuredCanvasInspectorType code { color: #aab2c1; }
+:root[data-theme='dark'] .structuredCanvasNodeToolbar { border-color: #414756; background: #292d37; box-shadow: 0 8px 24px rgba(0,0,0,.32); }
+:root[data-theme='dark'] .structuredCanvasNodeToolbar button { color: #b8c0cf; }
+
+@media (max-width: 1100px) { .structuredCanvasEditor { --canvas-dock-width: 260px; } .structuredCanvasAiPanel { --canvas-dock-width: 300px; } }
+@media (max-width: 900px) { .structuredCanvasDock { position: absolute; inset: 0 auto 0 0; width: min(300px, 84%); box-shadow: 8px 0 24px rgba(24, 32, 51, .12); } .structuredCanvasDockRight, .structuredCanvasInspector, .structuredCanvasInspectorDrawer { position: absolute; inset: 0 0 0 auto; width: min(300px, 84%); box-shadow: -8px 0 24px rgba(24, 32, 51, .12); } }
+
+/* The docks shrink the stage, not the viewport, so the toolbar drops its text
+   labels once the stage can no longer hold them (toolbar is ~615px wide). */
+@container (max-width: 660px) {
+  .structuredCanvasBottomToolbar button span { display: none; }
+}
+
+/* The header's right-hand actions. One group, so the title's `flex: 1` keeps the
+   whole cluster against the right edge instead of stretching between them. The
+   header itself is positioned so the dropdowns below it paint over the canvas. */
+.structuredCanvasHeader { position: relative; z-index: 20; }
+.structuredCanvasHeaderTools { flex: none; display: flex; align-items: center; gap: 4px; }
+.structuredCanvasHeaderTools > button,
+.structuredCanvasVersion > button { height: 30px; display: inline-flex; align-items: center; gap: 5px; padding: 0 10px; border: 0; border-radius: 6px; background: transparent; color: inherit; font-size: 12px; cursor: pointer; }
+.structuredCanvasHeaderTools > button:hover:not(:disabled),
+.structuredCanvasVersion > button:hover { color: var(--accent, #4f67e8); background: color-mix(in srgb, var(--accent, #4f67e8) 9%, transparent); }
+.structuredCanvasHeaderTools > button.active,
+.structuredCanvasVersion > button.active { color: var(--accent, #4f67e8); background: color-mix(in srgb, var(--accent, #4f67e8) 12%, transparent); }
+.structuredCanvasHeaderTools > button:disabled { opacity: .5; cursor: default; }
+
+/* Search over the components already on the canvas. The field widens on focus so
+   it stays out of the way while the canvas is being worked on. */
+.structuredCanvasSearch { position: relative; flex: none; }
+.structuredCanvasSearchField { display: flex; align-items: center; gap: 5px; width: 168px; height: 28px; padding: 0 6px 0 8px; border: 1px solid var(--border-subtle, var(--border, #dde3ee)); border-radius: 6px; background: var(--bg-base, #f7f8fc); color: var(--text-muted, #758096); transition: width .14s ease; }
+.structuredCanvasSearchField:focus-within { width: 224px; border-color: color-mix(in srgb, var(--accent, #4f67e8) 55%, transparent); background: var(--bg-elevated, #fff); }
+.structuredCanvasSearchField input { flex: 1; min-width: 0; height: 100%; border: 0; background: transparent; color: var(--text, #2b3445); font-size: 12px; outline: none; }
+.structuredCanvasSearchField input::-webkit-search-cancel-button { display: none; }
+.structuredCanvasSearchClear { flex: none; display: grid; place-items: center; width: 18px; height: 18px; padding: 0; border: 0; border-radius: 4px; background: transparent; color: inherit; cursor: pointer; }
+.structuredCanvasSearchClear:hover { color: var(--accent, #4f67e8); }
+.structuredCanvasSearchResults { position: absolute; z-index: 40; top: calc(100% + 6px); right: 0; width: 300px; max-height: 320px; overflow-y: auto; padding: 4px; border: 1px solid color-mix(in srgb, var(--border, #d8deea) 92%, transparent); border-radius: 8px; background: var(--bg-elevated, #fff); box-shadow: 0 12px 32px rgba(31,42,68,.18); }
+.structuredCanvasSearchResults button { display: flex; flex-direction: column; gap: 2px; width: 100%; padding: 6px 8px; border: 0; border-radius: 6px; background: transparent; text-align: left; cursor: pointer; }
+.structuredCanvasSearchResults button:hover, .structuredCanvasSearchResults button.active { background: color-mix(in srgb, var(--accent, #4f67e8) 10%, transparent); }
+.structuredCanvasSearchResultTitle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text, #2b3445); font-size: 12px; }
+.structuredCanvasSearchResultMeta { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-muted, #7c8599); font-size: 11px; }
+.structuredCanvasSearchEmpty { margin: 0; padding: 10px 8px; color: var(--text-muted, #7c8599); font-size: 12px; }
+
+/* Saved versions of the whole canvas. */
+.structuredCanvasVersion { position: relative; flex: none; }
+.structuredCanvasVersionPanel { position: absolute; z-index: 40; top: calc(100% + 6px); right: 0; width: 324px; padding: 8px; border: 1px solid color-mix(in srgb, var(--border, #d8deea) 92%, transparent); border-radius: 8px; background: var(--bg-elevated, #fff); box-shadow: 0 12px 32px rgba(31,42,68,.18); }
+.structuredCanvasVersionSave { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+.structuredCanvasVersionSave input { flex: 1; min-width: 0; height: 28px; padding: 0 8px; border: 1px solid var(--border-subtle, var(--border, #dde3ee)); border-radius: 6px; background: var(--bg-base, #f7f8fc); color: var(--text, #2b3445); font-size: 12px; }
+.structuredCanvasVersionSave button { flex: none; display: inline-flex; align-items: center; justify-content: center; height: 28px; padding: 0 10px; border: 1px solid color-mix(in srgb, var(--accent, #4f67e8) 40%, transparent); border-radius: 6px; background: color-mix(in srgb, var(--accent, #4f67e8) 10%, transparent); color: var(--accent, #4f67e8); font-size: 12px; cursor: pointer; }
+.structuredCanvasVersionSave button:disabled { opacity: .55; cursor: default; }
+.structuredCanvasVersionEmpty { display: flex; align-items: center; gap: 6px; margin: 0; padding: 10px 4px; color: var(--text-muted, #7c8599); font-size: 12px; }
+.structuredCanvasVersionList { max-height: 300px; margin: 0; padding: 0; overflow-y: auto; list-style: none; }
+.structuredCanvasVersionList li { display: flex; align-items: center; gap: 2px; padding: 5px 4px 5px 8px; border-radius: 6px; }
+.structuredCanvasVersionList li:hover { background: color-mix(in srgb, var(--accent, #4f67e8) 6%, transparent); }
+.structuredCanvasVersionInfo { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.structuredCanvasVersionInfo strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text, #2b3445); font-size: 12px; font-weight: 500; }
+.structuredCanvasVersionInfo small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-muted, #7c8599); font-size: 11px; }
+.structuredCanvasVersionList button { flex: none; display: grid; place-items: center; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 5px; background: transparent; color: var(--text-muted, #758096); cursor: pointer; }
+.structuredCanvasVersionList button:hover:not(:disabled) { color: var(--accent, #4f67e8); background: color-mix(in srgb, var(--accent, #4f67e8) 10%, transparent); }
+.structuredCanvasVersionList button.danger:hover:not(:disabled) { color: var(--danger, #d9483b); background: color-mix(in srgb, var(--danger, #d9483b) 10%, transparent); }
+.structuredCanvasVersionList button:disabled { opacity: .45; cursor: default; }
+
+/* Guides for the drag in progress: a zero-size anchor inside the viewport, the
+   same trick the drawing layer uses, so they pan and zoom for free. The line's
+   thickness is set inline as 1/zoom to keep it one screen pixel wide. */
+.structuredCanvasAlignmentLayer { position: absolute; z-index: 1001; top: 0; left: 0; width: 0; height: 0; overflow: visible; pointer-events: none; }
+.structuredCanvasAlignmentGuide { position: absolute; display: block; background: var(--accent, #5b6ee8); opacity: .9; }
+
+@media (max-width: 1180px) {
+  .structuredCanvasHeaderTools > button span, .structuredCanvasVersion > button span { display: none; }
+  .structuredCanvasHeaderTools > button, .structuredCanvasVersion > button { padding: 0 7px; }
+}
+@media (max-width: 900px) {
+  .structuredCanvasSearchField { width: 118px; }
+  .structuredCanvasSearchField:focus-within { width: 158px; }
+}
+
+:root[data-theme='dark'] .structuredCanvasHeaderTools > button:hover:not(:disabled),
+:root[data-theme='dark'] .structuredCanvasVersion > button:hover { color: #9db0ff; background: rgba(109,132,240,.16); }
+:root[data-theme='dark'] .structuredCanvasHeaderTools > button.active,
+:root[data-theme='dark'] .structuredCanvasVersion > button.active { color: #9db0ff; background: rgba(109,132,240,.2); }
+:root[data-theme='dark'] .structuredCanvasSearchField { border-color: #343844; background: #20232b; color: #aab2c1; }
+:root[data-theme='dark'] .structuredCanvasSearchField:focus-within { background: #292d37; }
+:root[data-theme='dark'] .structuredCanvasSearchField input { color: #edf1f7; }
+:root[data-theme='dark'] .structuredCanvasSearchResults,
+:root[data-theme='dark'] .structuredCanvasVersionPanel { border-color: #343844; background: #20232b; }
+:root[data-theme='dark'] .structuredCanvasSearchResultTitle,
+:root[data-theme='dark'] .structuredCanvasVersionInfo strong { color: #edf1f7; }
+:root[data-theme='dark'] .structuredCanvasSearchResultMeta,
+:root[data-theme='dark'] .structuredCanvasVersionInfo small,
+:root[data-theme='dark'] .structuredCanvasVersionEmpty,
+:root[data-theme='dark'] .structuredCanvasSearchEmpty { color: #aab2c1; }
+:root[data-theme='dark'] .structuredCanvasVersionSave input { border-color: #414756; background: #292d37; color: #edf1f7; }
+:root[data-theme='dark'] .structuredCanvasVersionSave button { color: #9db0ff; }
+:root[data-theme='dark'] .structuredCanvasVersionList button { color: #b8c0cf; }
+:root[data-theme='dark'] .structuredCanvasVersionList button:hover:not(:disabled) { color: #9db0ff; background: rgba(109,132,240,.16); }
+:root[data-theme='dark'] .structuredCanvasAlignmentGuide { background: #8fa2ff; }

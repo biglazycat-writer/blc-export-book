@@ -1,0 +1,15 @@
+{
+  "externalChangeConflict": "This content changed externally while you were editing. Resolve your current changes, then reopen it.",
+  "actions": {
+    "openContainingFolder": "Show in file manager",
+    "save": "Save",
+    "cancel": "Cancel",
+    "ok": "OK",
+    "delete": "Delete",
+    "close": "Close",
+    "retry": "Retry"
+  },
+  "state": {
+    "loading": "Loading…"
+  }
+}
