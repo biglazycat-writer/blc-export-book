@@ -1,4 +1,5 @@
-import { readDocument, type ResourceEntry } from 'blc-plugin-sdk';
+import { type ResourceEntry } from 'blc-plugin-sdk';
+import { readArticle, type ExportState } from '../../article-source';
 import { getSDK, getSession, workspaceTarget } from './sdk';
 import type { WorkExportChapter, WorkExportManuscript, WorkExportScope } from '../types/models';
 import {resolveSourceImages,sourceWordCount} from './source-images';
@@ -44,16 +45,24 @@ export async function readImageAsDataURL(src:string):Promise<string> {
 }
 
 const basename=(path:string)=>path.replaceAll('\\','/').split('/').pop()?.replace(/\.(md|markdown|txt)$/i,'')||'未命名';
+function resourceDate(nanoseconds:number):string {
+  // API 1 ModTimeUnix is Unix nanoseconds, matching the host's file scan.
+  if (!Number.isFinite(nanoseconds) || nanoseconds===0) return '';
+  const date=new Date(nanoseconds/1_000_000);
+  return Number.isFinite(date.getTime()) ? date.toISOString() : '';
+}
 function chapter(id:string,title:string,content:string,volume_path='',updated_at=''):WorkExportChapter {
   return {id,title,content,volume_path,synopsis:'',word_count:sourceWordCount(content),created_at:updated_at,updated_at};
 }
 
 export async function getChapter(id:string):Promise<WorkExportChapter> {
-  const ctx=getSession().context;
-  if (id===ctx.documentId && ctx.editorId) {
-    const doc=await readDocument(getSDK().documents,{...workspaceTarget(),documentId:id,editorId:ctx.editorId,windowId:ctx.windowId});
-    const title=ctx.resource ? basename(ctx.resource) : doc.content.match(/^#\s+(.+)$/m)?.[1] || basename(id);
-    return chapter(id,title,resolveSourceImages(doc.content,ctx.resource||id,workspaceTarget().workspaceId));
+  const session=getSession(),ctx=session.context;
+  if (id===ctx.documentId && (session.state as ExportState)?.mode==='article') {
+    const source=(session.state as ExportState).articleSource;
+    if(!source || source.documentId!==id)throw new Error('请从文章重新打开排版导出，以读取本次稿件');
+    const content=await readArticle(getSDK().storage,source,workspaceTarget().workspaceId);
+    const title=source.resource ? basename(source.resource) : content.match(/^#\s+(.+)$/m)?.[1] || basename(id);
+    return chapter(id,title,resolveSourceImages(content,source.resource||id,workspaceTarget().workspaceId));
   }
   return chapter(id,basename(id),resolveSourceImages(await readResource(id),id,workspaceTarget().workspaceId));
 }
@@ -79,7 +88,7 @@ export async function loadWorkExportManuscript(_id:string,scope:WorkExportScope)
           await walk(entry.Rel);
         } else if (/\.(md|markdown|txt)$/i.test(entry.Rel)) {
           const content=resolveSourceImages(await readResource(entry.Rel),entry.Rel,workspaceTarget().workspaceId);
-          result.chapters.push(chapter(entry.Rel,entry.Title||basename(entry.Name),content,volume,new Date(entry.ModTimeUnix*1000).toISOString()));
+          result.chapters.push(chapter(entry.Rel,entry.Title||basename(entry.Name),content,volume,resourceDate(entry.ModTimeUnix)));
         }
       }
     }

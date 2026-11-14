@@ -1,6 +1,6 @@
 {
   "name": "blc-export-book",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "private": true,
   "type": "module",
   "description": "大懒猫创作平台排版导出插件",
@@ -97,7 +97,8 @@
         },
         {
           "id": "export.book",
-          "title": "制作书籍",
+          "title": "导出这个文件夹排版制作书籍",
+          "contexts": ["workspace"],
           "aiCallable": true,
           "externalEffect": false
         },
@@ -140,7 +141,7 @@
           "command": "export.article"
         },
         {
-          "location": "toolbar",
+          "location": "resource",
           "command": "export.book"
         }
       ],

@@ -6,6 +6,8 @@ Standalone migration of the desktop typesetting workspace and image designer.
 - Books from workspace folders: EPUB, PDF, Word, and HTML, with chapter selection and ordering.
 - Bundled Typst WASM, Chinese/emoji/monospace fonts, WenKai, math and Mermaid rendering, and PDF.js preview assets.
 - Live article snapshots include unsaved changes. Folder exports read saved files.
+- Articles are captured before opening the typesetting page. Each invocation captures a fresh draft; page reloads keep that snapshot after the source editor closes.
+- “导出这个文件夹排版制作书籍” is declared in the SDK `resource` context menu for local creation folders and the workspace root. It opens the chosen folder, or the containing folder of a chosen file. The command palette and plugin center open a picker with separate actions to browse a folder and select it for book export, including its subfolders.
 - Files stream through bounded SDK messages to a temporary file before final replacement. Settings and cover images persist in plugin workspace storage.
 
 Requires desktop 0.4.5+, plugin API 1 revision 3, and the host-supported Node 22 runtime.
@@ -18,7 +20,7 @@ node scripts/check-browser.mjs
 npm run package
 ```
 
-Install the resulting `dist-package/blc-export-book-0.1.0.tgz` as a prebuilt plugin without rebuilding. Runtime dependencies are bundled; no `node_modules` or font/WASM downloads are required at runtime. Remote article images still need to be accessible.
+Install the resulting `dist-package/blc-export-book-0.1.2.tgz` as a prebuilt plugin without rebuilding. Runtime dependencies are bundled; no `node_modules` or font/WASM downloads are required at runtime. Remote article images still need to be accessible.
 
 The browser verifier runs production assets and the bundled backend against a local RPC test host, checks seven actual exported files, and records external requests. Outputs live in `.vite/browser-check/`. Set `BLC_BROWSER` to a Chrome/Edge executable. In restricted test environments, `BLC_BROWSER_SINGLE_PROCESS=1` confines Chromium to one test process; it does not change the plugin runtime.
 

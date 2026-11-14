@@ -13,22 +13,33 @@ const profile=await mkdtemp(join(output,'profile-'));
 const markdown='# 离线排版验证\n\n这是包含**粗体**和中文标点的文章，用于验证离线导出。\n\n## 公式与表格\n\n行内公式 $E=mc^2$。\n\n| 项目 | 结果 |\n| --- | --- |\n| 中文字体 | 正常 |\n| 离线加载 | 正常 |\n\n```mermaid\ngraph LR\nA[文稿] --> B[排版] --> C[导出]\n```\n\n![本地插图](./插图.svg)\n\n最后一段正文。'+embeddedMarkdown;
 const fixtureRoot=join(output,'workspace');await mkdir(fixtureRoot,{recursive:true});
 await writeFile(join(fixtureRoot,'导出画布.canvas'),JSON.stringify(canvasFile));await writeFile(join(fixtureRoot,'导出导图.xmind'),await mindMapArchive());
-const resourceItems=['第二章.md','导出画布.canvas','导出导图.xmind'].map(name=>({Rel:name,Name:name,Title:name,IsDir:false,ModTimeUnix:1,Kind:extname(name).slice(1)}));
-const resourcePage={items:resourceItems,total:resourceItems.length,nextOffset:resourceItems.length};
+const modified=Date.parse('2026-11-14T04:30:00.000Z')*1_000_000;
+const resource=(path,isDir=false)=>({Rel:path,Name:path.split('/').pop(),Title:path.split('/').pop(),IsDir:isDir,ModTimeUnix:modified,Kind:isDir?'directory':extname(path).slice(1)});
+const resourceTree={
+ '':['第二章.md','导出画布.canvas','导出导图.xmind'].map(name=>resource(name)).concat(resource('作品集',true)),
+ '作品集':[resource('作品集/第一章.md'),resource('作品集/卷一',true)],
+ '作品集/卷一':[resource('作品集/卷一/第二章.md')],
+};
+const resourcePaths=[],readPaths=[];
+function resourcePage(path='') {assert.ok(resourceTree[path],`Unknown resource directory ${path}`);resourcePaths.push(path);const items=resourceTree[path];return {items,total:items.length,nextOffset:items.length};}
 const imageData='data:image/svg+xml;base64,'+Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="160" height="40"><rect width="160" height="40" rx="8" fill="#e0e9f5"/><circle cx="30" cy="20" r="12" fill="#496ba6"/><path d="M55 20h85" stroke="#496ba6" stroke-width="4"/></svg>').toString('base64');
 const ctx={source:'editor.document',workspaceId:'workspace',workspaceSession:'workspace-session',documentId:'draft',editorId:'editor',windowId:'window',sessionId:'view',resource:'离线排版验证.md'};
 const session={pluginId:'blc-export-book',viewId:'main',instanceId:'view',title:'排版导出',location:'tab',context:ctx,state:{mode:'article'},dirty:false,connected:true,colorScheme:'light'};
 const commands=new Map(),tasks=new Map(),settings=new Map(),saved=[],requests=[];let seq=0;
-const dispose=await plugin.activate({commands:{register:(id,handler)=>commands.set(id,handler)},workspace:{list:async()=>[{id:'workspace',rootPath:fixtureRoot}],resources:async args=>{assert.equal(args.workspaceSession,ctx.workspaceSession);return resourcePage;}},ui:{saveFile:async args=>join(output,`${++seq}-${args.filename}`)},views:{open:async()=>session}});
+const documentChunk=()=>{const bytes=Buffer.byteLength(markdown);return {exportId:'snapshot',format:'markdown',formatVersion:1,chunk:markdown,offset:0,nextOffset:bytes,totalBytes:bytes,hash:createHash('sha256').update(markdown).digest('hex'),revision:'1',draftHash:'draft',dirty:true};};
+let editorAvailable=true,articleCaptures=0;
+const dispose=await plugin.activate({commands:{register:(id,handler)=>commands.set(id,handler)},storage:{get:async key=>settings.get(key)??null,set:async(key,value)=>{assert.ok(Buffer.byteLength(JSON.stringify(value))<=64*1024);settings.set(key,value);}},documents:{export:async()=>{assert.ok(editorAvailable,'Editor is no longer available');articleCaptures++;return documentChunk();}},workspace:{list:async()=>[{id:'workspace',rootPath:fixtureRoot}],resources:async args=>{assert.equal(args.workspaceSession,ctx.workspaceSession);return resourcePage(args.path);}},ui:{saveFile:async args=>join(output,`${++seq}-${args.filename}`)},views:{open:async(_id,options)=>{session.context=options.context;session.state=options.state;editorAvailable=false;return session;}}});
+await commands.get('export.article')({}, {...ctx,signal:new AbortController().signal});
 async function rpc(method,args){
  if(method==='view.context')return session;
- if(method==='view.ready'||method==='view.state')return null;
+ if(method==='view.ready')return null;
+ if(method==='view.state'){session.state=args.state;return null;}
  if(method==='storage.get')return settings.get(args.key)??null;
  if(method==='storage.set'){assert.ok(Buffer.byteLength(JSON.stringify(args.value))<=64*1024);settings.set(args.key,args.value);return null;}
- if(method==='documents.export'){const bytes=Buffer.byteLength(markdown);return {exportId:'snapshot',format:'markdown',formatVersion:1,chunk:markdown,offset:0,nextOffset:bytes,totalBytes:bytes,hash:createHash('sha256').update(markdown).digest('hex'),revision:'1',draftHash:'draft',dirty:true};}
+ if(method==='documents.export')throw new Error('EDITOR_UNAVAILABLE: original editor has closed');
  if(method==='resources.image'){assert.ok(args.src.startsWith('/creation-image/workspace/'));return {chunk:imageData.slice(args.offset||0),total:imageData.length,hash:createHash('sha256').update(imageData).digest('hex')};}
- if(method==='resources.list')return resourcePage;
- if(method==='resources.read') {const text='## 书籍正文\n\n这是书籍中的一章。'+embeddedMarkdown;return {path:args.path,content:text,offset:0,nextOffset:Buffer.byteLength(text),totalBytes:Buffer.byteLength(text),hash:createHash('sha256').update(text).digest('hex'),complete:true};}
+ if(method==='resources.list')return resourcePage(args.path);
+ if(method==='resources.read') {readPaths.push(args.path);const text='## 书籍正文\n\n这是书籍中的一章。'+(args.path.startsWith('作品集/')?'所选文件夹的正文。':embeddedMarkdown);return {path:args.path,content:text,offset:0,nextOffset:Buffer.byteLength(text),totalBytes:Buffer.byteLength(text),hash:createHash('sha256').update(text).digest('hex'),complete:true};}
  if(method==='commands.invoke') {
   const id=String(++seq);const task={id,state:'running',hasResult:false};tasks.set(id,task);
   Promise.resolve().then(()=>commands.get(args.command)(args.args,{...ctx,signal:new AbortController().signal,progress:async()=>{}})).then(result=>{Object.assign(task,{state:'completed',hasResult:true,result});if(args.command==='save.finish')saved.push(result);}).catch(error=>Object.assign(task,{state:'failed',error:String(error.message),errorCode:'TEST_ERROR'}));
@@ -78,22 +89,48 @@ try{
  await send('Page.navigate',{url:`http://127.0.0.1:${server.address().port}${prefix}dist/ui/index.html`});
  await until("document.querySelector('.typesetPreviewCanvas') || document.querySelector('.typesetPreview canvas') || document.querySelector('canvas')");
  await save('PDF');
+ // Reload the production page after its editor has been destroyed.
+ await send('Page.reload');
+ await until("document.querySelector('.typesetPreviewCanvas') || document.querySelector('.typesetPreview canvas') || document.querySelector('canvas')");
+ assert.equal(articleCaptures,1,'Page reload must read its immutable snapshot without contacting the editor');
  for(const format of ['Word','HTML']){await evaluate(`(()=>{[...document.querySelectorAll('.typesetFormatOption')].find(b=>b.querySelector('strong').textContent===${JSON.stringify(format)}).click()})()`);await save(format);}
  const shot=await send('Page.captureScreenshot',{format:'png'});await writeFile(join(output,'article.png'),Buffer.from(shot.data,'base64'));
  await click('图片设计器');await until("[...document.querySelectorAll('button')].some(b=>b.textContent.trim()==='导出 PNG'&&!b.disabled)");
  assert.ok(await evaluate("document.querySelectorAll('.imageDesignContent img').length>=4"),'PNG must contain local image, Mermaid, canvas and mind map');
  assert.equal(await evaluate("document.querySelector('.imageDesignContent').textContent.includes('\"type\"')"),false,'PNG must not print document JSON');
  await save('PNG');
- await evaluate("window.dispatchEvent(new Event('export:home'))");
- await until("document.querySelector('.exportHome')");
- await until("!document.querySelector('.folderBar button:last-child').disabled");
- await click('将此文件夹制作成书籍');await until("document.querySelector('.typesetFormatOption')");
+ // Exercise the actual creation-root command (empty resource omitted by host).
+ await commands.get('export.book')({}, {...ctx,source:'resource',resource:undefined,signal:new AbortController().signal});
+ assert.equal(session.state.folderPath,'');assert.equal(session.context.editorId,undefined);
+ await send('Page.reload');await until("document.querySelector('.typesetFormatOption')");
+ assert.equal(await evaluate("Boolean(document.querySelector('.exportHome'))"),false,'Root context menu must open typesetting directly');
  await evaluate("[...document.querySelectorAll('.typesetFormatOption')].find(b=>b.querySelector('strong').textContent==='EPUB').click()");await save('EPUB');
  for(const format of ['PDF','Word']){await evaluate(`(()=>{[...document.querySelectorAll('.typesetFormatOption')].find(b=>b.querySelector('strong').textContent===${JSON.stringify(format)}).click()})()`);await save(format);}
+ // The picker must offer selecting a folder separately from browsing it.
+ await commands.get('export.book')({}, {...ctx,source:'palette',signal:new AbortController().signal});
+ await send('Page.reload');await until("document.querySelector('[aria-label=\"选择此文件夹制作书籍：作品集\"]')");
+ await writeFile(join(output,'folder-picker.png'),Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
+ await send('Emulation.setDeviceMetricsOverride',{width:480,height:840,deviceScaleFactor:1,mobile:false});
+ assert.equal(await evaluate('document.documentElement.scrollWidth<=window.innerWidth'),true,'Folder picker must fit narrow pages');
+ await writeFile(join(output,'folder-picker-narrow.png'),Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
+ await send('Emulation.setDeviceMetricsOverride',{width:1380,height:920,deviceScaleFactor:1,mobile:false});
+ await evaluate("document.querySelector('[aria-label=\"浏览文件夹：作品集\"]').click()");
+ await until("document.querySelector('.folderBar>span')?.textContent==='作品集' && !document.querySelector('[role=status]')");
+ assert.equal(await evaluate("Boolean(document.querySelector('.exportHome'))"),true,'Browsing a folder must keep the picker open');
+ await click('上一级');await until("document.querySelector('[aria-label=\"选择此文件夹制作书籍：作品集\"]')");
+ readPaths.length=0;
+ await evaluate("document.querySelector('[aria-label=\"选择此文件夹制作书籍：作品集\"]').click()");
+ await until("document.querySelector('.typesetFormatOption')");
+ await evaluate("[...document.querySelectorAll('.typesetFormatOption')].find(b=>b.querySelector('strong').textContent==='EPUB').click()");await save('EPUB');
+ assert.deepEqual([...new Set(readPaths)].sort(),['作品集/第一章.md','作品集/卷一/第二章.md'].sort(),'Folder selection must read only its own subtree');
+ await commands.get('export.book')({}, {...ctx,source:'resource',resource:'作品集',signal:new AbortController().signal});
+ assert.equal(session.state.folderPath,'作品集');assert.equal(session.context.documentId,undefined);
+ await send('Page.reload');await until("document.querySelector('.typesetFormatOption')");
+ assert.equal(await evaluate("Boolean(document.querySelector('.exportHome'))"),false,'Folder context menu must open typesetting directly');
  assert.equal(external.length,0,'Unexpected external fetches: '+external.join('\n'));
  for(const file of saved){const bytes=await readFile(file.path);const extension=extname(file.path);if(extension==='.pdf')assert.equal(bytes.subarray(0,5).toString(),'%PDF-');if(extension==='.png')assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');if(extension==='.docx'){const zip=await JSZip.loadAsync(bytes);assert.ok(zip.file('word/document.xml'));}if(extension==='.epub'){const zip=await JSZip.loadAsync(bytes);assert.equal(await zip.file('mimetype').async('string'),'application/epub+zip');}if(extension==='.html')assert.match(bytes.toString(),/最后一段正文/);}
  assert.ok(requests.some(url=>url.endsWith('typst_ts_web_compiler_bg.wasm')));assert.ok(requests.some(url=>url.endsWith('NotoSerifSC_400Regular.ttf')));
  const html=(await readFile(saved.find(item=>item.path.endsWith('.html')).path,'utf8'));
  assert.match(html,/alt="原始画布"/);assert.match(html,/alt="原始导图"/);
- await writeFile(join(output,'result.json'),JSON.stringify({saved,external,errors,requests:[...new Set(requests)]},null,2));console.log('Browser exports passed without external requests.');
+ await writeFile(join(output,'result.json'),JSON.stringify({saved,external,errors,articleCaptures,editorAvailable,modifiedNanoseconds:modified,resourcePaths,selectedFolderReads:[...new Set(readPaths)],folderContextDirect:true,pickerSelection:true,requests:[...new Set(requests)]},null,2));console.log('Browser exports, nanosecond dates, folder picker, context targets and reload after editor close passed without external requests.');
 }catch(error){console.error(error);process.exitCode=1;}finally{socket?.close();browser.kill();server.closeAllConnections();await new Promise(resolve=>server.close(resolve));await dispose();}

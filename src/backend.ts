@@ -3,6 +3,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { mkdir, open, rename, rm, type FileHandle } from 'node:fs/promises';
 import { dirname, extname, join } from 'node:path';
 import { readEmbeddedFile } from './resource-file.js';
+import { captureArticle, discardArticle } from './article-source.js';
 
 type Transfer={file:FileHandle;temp:string;path:string;size:number;written:number;owner:string;hash:ReturnType<typeof createHash>;busy:boolean;expires:number};
 export default definePlugin(async ctx=>{
@@ -12,10 +13,39 @@ export default definePlugin(async ctx=>{
   const timer=setInterval(()=>{for(const [id,entry] of transfers)if(!entry.busy&&entry.expires<Date.now())void discard(id);},30_000);
   timer.unref();
   function acquire(id:string,inv:Invocation) { const entry=transfers.get(id); if(!entry||entry.owner!==(inv.sessionId||inv.windowId||''))throw new Error('导出传输已过期');if(entry.busy)throw new Error('请按顺序传输文件');entry.busy=true;entry.expires=Date.now()+120_000;return entry; }
-  for(const mode of ['article','book']) ctx.commands.register(`export.${mode}`,async (_args:unknown,inv:Invocation)=>{
+  ctx.commands.register('export.article',async (_args:unknown,inv:Invocation)=>{
     inv.signal.throwIfAborted();
-    if(mode==='article'&&(!inv.documentId||!inv.editorId))throw new Error('请从文章编辑器打开排版导出');
-    return ctx.views.open('main',{context:inv,state:{mode}});
+    const articleSource=await captureArticle(ctx,inv);
+    try {
+      inv.signal.throwIfAborted();
+      return await ctx.views.open('main',{context:inv,state:{mode:'article',articleSource}});
+    } catch(error) {await discardArticle(ctx.storage,articleSource,inv.workspaceId!);throw error;}
+  });
+  ctx.commands.register('export.book',async (_args:unknown,inv:Invocation)=>{
+    inv.signal.throwIfAborted();
+    if(!inv.workspaceId||!inv.workspaceSession)throw new Error('请先打开工作区');
+    const {documentId,editorId,revision,selection,...context}=inv;
+    let folderPath:string|undefined;
+    if(inv.source==='resource') {
+      // The host omits an empty resource string on the wire for the root menu.
+      const path=(inv.resource||'').replaceAll('\\','/');
+      folderPath='';
+      if(path) {
+        const parent=path.split('/').slice(0,-1).join('/');
+        let offset=0;
+        for (;;) {
+          inv.signal.throwIfAborted();
+          const page=await ctx.workspace.resources({workspaceId:inv.workspaceId!,workspaceSession:inv.workspaceSession!,path:parent,offset,limit:100});
+          const entry=page.items.find(item=>item.Rel===path);
+          if(entry){folderPath=entry.IsDir?path:parent;break;}
+          if(page.nextOffset>=page.total)throw new Error('所选资源已不存在，请重新打开创作区菜单');
+          if(page.nextOffset<=offset)throw new Error('资源列表没有返回下一页');
+          offset=page.nextOffset;
+        }
+      }
+    }
+    inv.signal.throwIfAborted();
+    return ctx.views.open('main',{context,state:{mode:'book',...(folderPath===undefined?{}:{folderPath})}});
   });
   ctx.commands.register('save.begin',async (args:{filename:string;size:number},inv:Invocation)=>{
     inv.signal.throwIfAborted();
