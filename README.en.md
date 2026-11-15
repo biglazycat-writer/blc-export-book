@@ -7,7 +7,7 @@ Standalone migration of the desktop typesetting workspace and image designer.
 - Bundled Typst WASM, Chinese/emoji/monospace fonts, WenKai, math and Mermaid rendering, and PDF.js preview assets.
 - Live article snapshots include unsaved changes. Folder exports read saved files.
 - Articles are captured before opening the typesetting page. Each invocation captures a fresh draft; page reloads keep that snapshot after the source editor closes.
-- “导出这个文件夹排版制作书籍” is declared in the SDK `resource` context menu for local creation folders and the workspace root. It opens the chosen folder, or the containing folder of a chosen file. The command palette and plugin center open a picker with separate actions to browse a folder and select it for book export, including its subfolders.
+- “排版导出” is declared in the SDK `resource` context menu for local creation folders and the workspace root. It opens the chosen folder, or the containing folder of a chosen file. The command palette and plugin center open a picker with separate actions to browse a folder and select it for book export, including its subfolders.
 - Files stream through bounded SDK messages to a temporary file before final replacement. Settings and cover images persist in plugin workspace storage.
 
 Requires desktop 0.4.5+, plugin API 1 revision 3, and the host-supported Node 22 runtime.
