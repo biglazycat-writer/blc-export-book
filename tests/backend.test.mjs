@@ -25,9 +25,12 @@ test('manifest commands are registered and open article/book with immutable invo
  assert.equal(h.opened[0].options.context,inv);assert.deepEqual(h.opened.map(v=>v.options.state.mode),['article','book']);
 });
 
-test('book entry uses the SDK resource menu and never the editor toolbar',()=>{
- const menus=manifest.biglazycat.contributes.menus.filter(menu=>menu.command==='export.book');
- assert.deepEqual(menus,[{location:'resource',command:'export.book'}]);
+test('one export feature explicitly dispatches article and directory entry actions',()=>{
+ const [feature]=manifest.biglazycat.contributes.features;
+ assert.deepEqual(feature.actions.resource,{command:'export.book'});
+ assert.deepEqual(feature.actions.sidebar,{command:'export.book'});
+ assert.deepEqual(feature.actions.toolbar,{command:'export.article'});
+ assert.equal(manifest.biglazycat.contributes.features.length,1);
  assert.equal(manifest.biglazycat.contributes.views[0].multiple,true);
 });
 

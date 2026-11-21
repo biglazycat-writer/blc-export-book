@@ -43,3 +43,7 @@ npm run package     # 产出 dist-package/blc-export-book-<版本>.tgz 与 SHA-2
 
 - Word 字体显示取决于阅读软件；PDF 内嵌排版字体；
 - 原生 Wails 菜单入口与跨平台 WebView 验收仍在进行，核对记录见 [docs/migration-status.md](docs/migration-status.md)。
+
+## 配置使用入口
+
+在大懒猫创作平台的插件详情中，为插件声明的功能选择使用入口。功能数量、支持的位置与对应动作由本插件的 `contributes.features` 决定；用户可以多选、取消或恢复默认。开发声明见 SDK 的 [功能入口协议](https://github.com/biglazycat-writer/blc-plugin-sdk/blob/main/FEATURES.md)。

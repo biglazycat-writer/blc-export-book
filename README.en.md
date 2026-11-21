@@ -43,3 +43,7 @@ npm run package     # produces dist-package/blc-export-book-<version>.tgz plus S
 
 - Word font rendering depends on the reading app; PDFs embed the typesetting fonts;
 - Native Wails menu entries and cross-platform WebView acceptance are still in progress — see [docs/migration-status.md](docs/migration-status.md).
+
+## Choosing feature locations
+
+Open plugin details in BigLazyCat Creator to choose where each declared feature appears. This plugin defines its features and supported locations in `contributes.features`; users choose among those locations. See the SDK [feature reference](https://github.com/biglazycat-writer/blc-plugin-sdk/blob/main/FEATURES.md) for the declaration format.
