@@ -1,13 +1,13 @@
 # Typeset Export (blc-export-book)
 
-A BigLazyCat Creator plugin that turns a single article or a whole folder into print-ready, shareable documents.
+A BigLazyCat Writer plugin that turns a single article or a whole folder into print-ready, shareable documents.
 
 | Target | Formats |
 | --- | --- |
 | Single article | PDF, Word `.docx`, HTML, PNG, EPUB |
 | Book from a folder | EPUB, PDF, Word `.docx`, HTML |
 
-Requires BigLazyCat Creator **0.4.5 or newer** (plugin API 1, revision 3).
+Requires BigLazyCat Writer **0.4.5 or newer** (plugin API 1, revision 3).
 
 ## Highlights
 
@@ -46,4 +46,4 @@ npm run package     # produces dist-package/blc-export-book-<version>.tgz plus S
 
 ## Choosing feature locations
 
-Open plugin details in BigLazyCat Creator to choose where each declared feature appears. This plugin defines its features and supported locations in `contributes.features`; users choose among those locations. See the SDK [feature reference](https://github.com/biglazycat-writer/blc-plugin-sdk/blob/main/FEATURES.md) for the declaration format.
+Open plugin details in BigLazyCat Writer to choose where each declared feature appears. This plugin defines its features and supported locations in `contributes.features`; users choose among those locations. See the SDK [feature reference](https://github.com/biglazycat-writer/blc-plugin-sdk/blob/main/FEATURES.md) for the declaration format.

@@ -268,7 +268,7 @@ function metadataParagraphs(book: WorkBookModel, template: Template, pageBreakBe
   add('', { size: template.bodySize })
   add('', { size: template.bodySize })
   add('', { size: template.bodySize })
-  add('大懒猫创作平台', { size: 20, color: '888888' })
+  add('大懒猫写作', { size: 20, color: '888888' })
   if (meta.publicationDate) add(meta.publicationDate, { size: 20, color: '888888' })
   return paragraphs
 }
@@ -312,7 +312,7 @@ function textCoverParagraphs(book: WorkBookModel, template: Template): Paragraph
   }
   paragraphs.push(...spacerParagraphs(6, template))
   paragraphs.push(
-    textParagraph('大懒猫创作平台', template, {
+    textParagraph('大懒猫写作', template, {
       size: 20,
       color: '888888',
       alignment: AlignmentType.CENTER,
@@ -1034,10 +1034,10 @@ export async function buildDocxBook(input: BuildDocxBookInput): Promise<Blob> {
   const document = new Document({
     title: book.meta.title,
     subject: book.meta.subtitle || undefined,
-    creator: book.meta.author || '大懒猫创作平台',
+    creator: book.meta.author || '大懒猫写作',
     description: book.meta.description || undefined,
     keywords: book.meta.keywords.join(', ') || undefined,
-    lastModifiedBy: '大懒猫创作平台',
+    lastModifiedBy: '大懒猫写作',
     revision: 1,
     features: { updateFields: true },
     styles: {

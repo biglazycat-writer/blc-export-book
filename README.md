@@ -1,13 +1,13 @@
 # 排版导出（blc-export-book）
 
-大懒猫创作平台的排版导出插件：把单篇文章或整个文件夹排版成可打印、可分发的成品。
+大懒猫写作的排版导出插件：把单篇文章或整个文件夹排版成可打印、可分发的成品。
 
 | 用途 | 导出格式 |
 | --- | --- |
 | 单篇文章 | PDF、Word `.docx`、HTML、PNG、EPUB |
 | 文件夹制作书籍 | EPUB、PDF、Word `.docx`、HTML |
 
-需要大懒猫创作平台 **0.4.5 及以上**（插件 API 1 修订 3）。
+需要大懒猫写作 **0.4.5 及以上**（插件 API 1 修订 3）。
 
 ## 功能亮点
 
@@ -46,4 +46,4 @@ npm run package     # 产出 dist-package/blc-export-book-<版本>.tgz 与 SHA-2
 
 ## 配置使用入口
 
-在大懒猫创作平台的插件详情中，为插件声明的功能选择使用入口。功能数量、支持的位置与对应动作由本插件的 `contributes.features` 决定；用户可以多选、取消或恢复默认。开发声明见 SDK 的 [功能入口协议](https://github.com/biglazycat-writer/blc-plugin-sdk/blob/main/FEATURES.md)。
+在大懒猫写作的插件详情中，为插件声明的功能选择使用入口。功能数量、支持的位置与对应动作由本插件的 `contributes.features` 决定；用户可以多选、取消或恢复默认。开发声明见 SDK 的 [功能入口协议](https://github.com/biglazycat-writer/blc-plugin-sdk/blob/main/FEATURES.md)。

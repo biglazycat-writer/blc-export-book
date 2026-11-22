@@ -1,6 +1,6 @@
 export function connect() {
   const config = globalThis.__biglazycatPlugin;
-  if (!config || config.apiVersion !== 1) throw new Error('API_MISMATCH: 请在大懒猫创作平台的插件页面中运行');
+  if (!config || config.apiVersion !== 1) throw new Error('API_MISMATCH: 请在大懒猫写作的插件页面中运行');
   let sequence = 0, pendingCalls = 0;
   async function call(method, params = {}) {
     if (pendingCalls >= 32) throw Object.assign(new Error('页面请求队列已满'), { code: 'BACKPRESSURE' });

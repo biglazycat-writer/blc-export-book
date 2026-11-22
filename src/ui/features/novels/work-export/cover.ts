@@ -93,7 +93,7 @@ export async function createDefaultCover(input: DefaultCoverInput): Promise<Expo
   ctx.textBaseline = 'alphabetic'
   ctx.fillStyle = accent
   ctx.font = '500 30px "PingFang SC", "Microsoft YaHei", sans-serif'
-  ctx.fillText('大懒猫创作平台', WIDTH / 2, 190)
+  ctx.fillText('大懒猫写作', WIDTH / 2, 190)
 
   const serif = '"Songti SC", "SimSun", "Noto Serif CJK SC", serif'
   ctx.fillStyle = foreground

@@ -2660,7 +2660,7 @@ index d1cd5dc..0000000
 -  ctx.textBaseline = 'alphabetic'
 -  ctx.fillStyle = accent
 -  ctx.font = '500 30px "PingFang SC", "Microsoft YaHei", sans-serif'
--  ctx.fillText('大懒猫创作平台', WIDTH / 2, 190)
+-  ctx.fillText('大懒猫写作', WIDTH / 2, 190)
 -
 -  const serif = '"Songti SC", "SimSun", "Noto Serif CJK SC", serif'
 -  ctx.fillStyle = foreground
@@ -3284,7 +3284,7 @@ index 30fcda1..0000000
 -  add('', { size: template.bodySize })
 -  add('', { size: template.bodySize })
 -  add('', { size: template.bodySize })
--  add('大懒猫创作平台', { size: 20, color: '888888' })
+-  add('大懒猫写作', { size: 20, color: '888888' })
 -  if (meta.publicationDate) add(meta.publicationDate, { size: 20, color: '888888' })
 -  return paragraphs
 -}
@@ -3328,7 +3328,7 @@ index 30fcda1..0000000
 -  }
 -  paragraphs.push(...spacerParagraphs(6, template))
 -  paragraphs.push(
--    textParagraph('大懒猫创作平台', template, {
+-    textParagraph('大懒猫写作', template, {
 -      size: 20,
 -      color: '888888',
 -      alignment: AlignmentType.CENTER,
@@ -4050,10 +4050,10 @@ index 30fcda1..0000000
 -  const document = new Document({
 -    title: book.meta.title,
 -    subject: book.meta.subtitle || undefined,
--    creator: book.meta.author || '大懒猫创作平台',
+-    creator: book.meta.author || '大懒猫写作',
 -    description: book.meta.description || undefined,
 -    keywords: book.meta.keywords.join(', ') || undefined,
--    lastModifiedBy: '大懒猫创作平台',
+-    lastModifiedBy: '大懒猫写作',
 -    revision: 1,
 -    features: { updateFields: true },
 -    styles: {
@@ -4749,7 +4749,7 @@ index b9cf080..0000000
 -    const { files } = await build({ includeCover: true })
 -    const cover = xml(files['OEBPS/cover.xhtml'])
 -    expect(cover.documentElement.textContent).toContain('测试书')
--    expect(cover.documentElement.textContent).toContain('大懒猫创作平台')
+-    expect(cover.documentElement.textContent).toContain('大懒猫写作')
 -    const opf = xml(files['OEBPS/content.opf'])
 -    expect(elements(opf, 'meta').some((node) => node.getAttribute('name') === 'cover')).toBe(false)
 -    expect(elements(opf, 'item').some((node) => node.getAttribute('properties') === 'cover-image')).toBe(false)
@@ -5043,7 +5043,7 @@ index 229a5ac..0000000
 -    }
 -  }
 -  const lines = [
--    '<p class="cover-brand">大懒猫创作平台</p>',
+-    '<p class="cover-brand">大懒猫写作</p>',
 -    `<h1 class="book-title">${escapeXml(book.meta.title)}</h1>`,
 -  ]
 -  if (book.meta.subtitle) lines.push(`<p class="book-subtitle">${escapeXml(book.meta.subtitle)}</p>`)
@@ -7809,7 +7809,7 @@ index 5c93fa9..0000000
 -    })
 -    const main = captured[0].main
 -    expect(main).toContain('margin: 0pt')
--    expect(main).toContain('大懒猫创作平台')
+-    expect(main).toContain('大懒猫写作')
 -    // Palette background, border and divider are Typst shapes/text, so page 1
 -    // is made of real objects instead of one 1200×1800 PNG.
 -    expect(main).toContain(
@@ -8002,7 +8002,7 @@ index 5c93fa9..0000000
 -      expect(text).toContain('测试书')
 -      expect(text).toContain('副标题')
 -      expect(text).toContain('作者甲')
--      expect(text).toContain('大懒猫创作平台')
+-      expect(text).toContain('大懒猫写作')
 -    },
 -    120_000,
 -  )
@@ -11383,7 +11383,7 @@ index 0bb0489..0000000
 -    )
 -    expect(main).toContain('#outline(title: [目录], depth: 2, indent: auto)')
 -    expect(main).toContain('margin: 0pt')
--    expect(main).toContain('大懒猫创作平台')
+-    expect(main).toContain('大懒猫写作')
 -    expect(main).toContain('ISBN：9780306406157')
 -    expect(main).toContain('#text("内容简介")')
 -    for (const title of ['封面', '扉页', '版权信息', '内容简介', '目录']) {
@@ -12398,7 +12398,7 @@ index 6d6339d..0000000
 -  const lines = [
 -    `#block(width: 100%, height: 100%, fill: rgb("${palette.background}"))[`,
 -    `  #place(top + left, dx: ${pt(x(72))}, dy: ${pt(y(72))})[#block(width: ${pt(x(1056))}, height: ${pt(x(1656))}, stroke: ${pt(x(3))} + rgb("${palette.accent}"))]`,
--    `  #place(top + center, dy: ${pt(y(190) - x(30) * 0.8)})[#text(size: ${pt(x(30))}, weight: "medium", fill: rgb("${palette.accent}"))[大懒猫创作平台]]`,
+-    `  #place(top + center, dy: ${pt(y(190) - x(30) * 0.8)})[#text(size: ${pt(x(30))}, weight: "medium", fill: rgb("${palette.accent}"))[大懒猫写作]]`,
 -    `  #place(top + center, dy: ${pt(titleTop)})[`,
 -    `    #block(width: ${pt(x(900))})[`,
 -    `      #block(width: 100%)[`,
@@ -12451,7 +12451,7 @@ index 6d6339d..0000000
 -    )
 -  }
 -  lines.push('#v(1fr)')
--  lines.push(`#align(center)[#text(size: 9pt, fill: luma(150))[${text('大懒猫创作平台')}]]`)
+-  lines.push(`#align(center)[#text(size: 9pt, fill: luma(150))[${text('大懒猫写作')}]]`)
 -  lines.push(']')
 -  return lines.join('\n')
 -}

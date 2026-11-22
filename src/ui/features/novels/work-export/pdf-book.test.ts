@@ -230,7 +230,7 @@ describe('buildPdfBook 打包', () => {
     })
     const main = captured[0].main
     expect(main).toContain('margin: 0pt')
-    expect(main).toContain('大懒猫创作平台')
+    expect(main).toContain('大懒猫写作')
     // Palette background, border and divider are Typst shapes/text, so page 1
     // is made of real objects instead of one 1200×1800 PNG.
     expect(main).toContain(
@@ -423,7 +423,7 @@ describe('buildPdfBook 真实 Typst 编译', () => {
       expect(text).toContain('测试书')
       expect(text).toContain('副标题')
       expect(text).toContain('作者甲')
-      expect(text).toContain('大懒猫创作平台')
+      expect(text).toContain('大懒猫写作')
     },
     120_000,
   )

@@ -487,7 +487,7 @@ describe('buildTypstBookSource', () => {
     )
     expect(main).toContain('#outline(title: [目录], depth: 2, indent: auto)')
     expect(main).toContain('margin: 0pt')
-    expect(main).toContain('大懒猫创作平台')
+    expect(main).toContain('大懒猫写作')
     expect(main).toContain('ISBN：9780306406157')
     expect(main).toContain('#text("内容简介")')
     for (const title of ['封面', '扉页', '版权信息', '内容简介', '目录']) {

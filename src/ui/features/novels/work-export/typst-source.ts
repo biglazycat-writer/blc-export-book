@@ -836,7 +836,7 @@ function vectorCoverSource(
   const lines = [
     `#block(width: 100%, height: 100%, fill: rgb("${palette.background}"))[`,
     `  #place(top + left, dx: ${pt(x(72))}, dy: ${pt(y(72))})[#block(width: ${pt(x(1056))}, height: ${pt(x(1656))}, stroke: ${pt(x(3))} + rgb("${palette.accent}"))]`,
-    `  #place(top + center, dy: ${pt(y(190) - x(30) * 0.8)})[#text(size: ${pt(x(30))}, weight: "medium", fill: rgb("${palette.accent}"))[大懒猫创作平台]]`,
+    `  #place(top + center, dy: ${pt(y(190) - x(30) * 0.8)})[#text(size: ${pt(x(30))}, weight: "medium", fill: rgb("${palette.accent}"))[大懒猫写作]]`,
     `  #place(top + center, dy: ${pt(titleTop)})[`,
     `    #block(width: ${pt(x(900))})[`,
     `      #block(width: 100%)[`,
@@ -889,7 +889,7 @@ function titlePageSource(book: WorkBookModel, body: number): string {
     )
   }
   lines.push('#v(1fr)')
-  lines.push(`#align(center)[#text(size: 9pt, fill: luma(150))[${text('大懒猫创作平台')}]]`)
+  lines.push(`#align(center)[#text(size: 9pt, fill: luma(150))[${text('大懒猫写作')}]]`)
   lines.push(']')
   return lines.join('\n')
 }

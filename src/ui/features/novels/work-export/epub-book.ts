@@ -157,7 +157,7 @@ function coverPage(book: WorkBookModel, coverHref: string | null): PageFile {
     }
   }
   const lines = [
-    '<p class="cover-brand">大懒猫创作平台</p>',
+    '<p class="cover-brand">大懒猫写作</p>',
     `<h1 class="book-title">${escapeXml(book.meta.title)}</h1>`,
   ]
   if (book.meta.subtitle) lines.push(`<p class="book-subtitle">${escapeXml(book.meta.subtitle)}</p>`)

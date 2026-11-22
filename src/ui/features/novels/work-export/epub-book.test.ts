@@ -409,7 +409,7 @@ describe('buildEpubBook', () => {
     const { files } = await build({ includeCover: true })
     const cover = xml(files['OEBPS/cover.xhtml'])
     expect(cover.documentElement.textContent).toContain('测试书')
-    expect(cover.documentElement.textContent).toContain('大懒猫创作平台')
+    expect(cover.documentElement.textContent).toContain('大懒猫写作')
     const opf = xml(files['OEBPS/content.opf'])
     expect(elements(opf, 'meta').some((node) => node.getAttribute('name') === 'cover')).toBe(false)
     expect(elements(opf, 'item').some((node) => node.getAttribute('properties') === 'cover-image')).toBe(false)
