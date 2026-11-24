@@ -1,10 +1,11 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Download, Image, Loader2, RefreshCw } from 'lucide-react'
-import { exportApi } from '../../bridge/export-api'
+import { exportApi, type ImageLibraryItem } from '../../bridge/export-api'
 import { loadPersistedSettings, savePersistedSettings } from '../../bridge/persistent-settings'
 import { getSDK, getSession } from '../../bridge/sdk'
 import { openAppPage } from '../../lib/app-navigation'
+import { base64ByteLength } from '../../lib/data-url'
 import i18n from '../../i18n'
 import { saveExportBlob } from '../../lib/save-export'
 import { normalizeWorkspaceKind } from '../../lib/work-types'
@@ -471,6 +472,20 @@ function DocumentTypesetPage({ novelId, chapterId: requestedChapterId, folderPat
     }
   }, [t])
 
+  // 素材库选图：弹窗内已校验格式，这里只做大小兜底后写入封面。
+  const handleCoverFromLibrary = useCallback((pick: { asset: ImageLibraryItem; dataUrl: string }) => {
+    const base64 = pick.dataUrl.slice(pick.dataUrl.indexOf(',') + 1)
+    if (base64ByteLength(base64) > COVER_MAX_BYTES) {
+      setBanner({ kind: 'error', text: t('typeset.errors.coverTooLarge') })
+      return
+    }
+    setSettings((current) => ({
+      ...current,
+      branding: { ...current.branding, coverDataUrl: pick.dataUrl, coverName: pick.asset.name || pick.asset.id },
+    }))
+    setBanner(null)
+  }, [t])
+
   const handleLogoFile = useCallback(async (file: File | undefined) => {
     if (!file) return
     if (!IMAGE_TYPES.test(file.type)) {
@@ -712,6 +727,7 @@ function DocumentTypesetPage({ novelId, chapterId: requestedChapterId, folderPat
           patch={patch}
           onFormatChange={handleFormatChange}
           onCoverFile={handleCoverFile}
+          onPickCoverFromLibrary={handleCoverFromLibrary}
           onLogoFile={handleLogoFile}
           onClearCover={() => patch((current) => ({
             ...current,

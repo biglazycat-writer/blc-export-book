@@ -376,8 +376,33 @@
       "previewAlt": "Cover preview",
       "placeholder": "Choose a cover image",
       "choose": "Choose image",
+      "libraryChoose": "Choose from library",
       "remove": "Remove",
       "hint": "The cover becomes the first page of PDF, Word and EPUB. Without one, PDF and EPUB draw a default cover from the title and Word uses its title page."
+    },
+    "libraryPicker": {
+      "title": "Choose a cover from the library",
+      "subtitle": "Browse the workspace asset library and pick an image as the cover.",
+      "closeAria": "Close cover picker",
+      "searchAria": "Search library images",
+      "searchPlaceholder": "Search image names",
+      "libraryTitle": "Workspace library",
+      "loading": "Loading…",
+      "totalCount": "{{count}} images",
+      "retry": "Retry",
+      "emptySearch": "No matching images",
+      "empty": "The library has no images yet",
+      "previewAria": "Preview {{name}}",
+      "readFailed": "Image could not be read",
+      "loadingPreview": "Loading preview…",
+      "loadMore": "Load more",
+      "selectedTitle": "Selected image",
+      "selectedAlt": "Selected: {{name}}",
+      "sourceLibrary": "Workspace library",
+      "previewEmpty": "Click an image to preview it",
+      "footerHint": "Confirming will replace the current cover.",
+      "cancel": "Cancel",
+      "useImage": "Use this cover"
     },
     "info": {
       "section": "Book info"

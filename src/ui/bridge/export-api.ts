@@ -30,6 +30,12 @@ export async function readResource(path:string): Promise<string> {
   }
 }
 
+export interface ImageLibraryItem {id:string;name:string;src:string;width:number;height:number}
+
+export async function listImageAssets(query='',offset=0,limit=24):Promise<{items:ImageLibraryItem[];total:number}> {
+  return getSDK().images.list({...workspaceTarget(),query,offset,limit});
+}
+
 export async function readImageAsDataURL(src:string):Promise<string> {
   if (/^data:image\//i.test(src)) return src;
   let result='',hash='',total=-1;
@@ -98,4 +104,4 @@ export async function loadWorkExportManuscript(_id:string,scope:WorkExportScope)
   for(const volume of result.volumes) { const chapters=result.chapters.filter(c=>c.volume_path===volume.path);volume.chapter_count=chapters.length;volume.word_count=chapters.reduce((sum,c)=>sum+c.word_count,0); }
   return result;
 }
-export const exportApi={loadWorkExportManuscript,readImageAsDataURL,getChapter};
+export const exportApi={loadWorkExportManuscript,readImageAsDataURL,listImageAssets,getChapter};

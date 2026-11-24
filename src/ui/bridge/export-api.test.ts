@@ -1,7 +1,7 @@
 import {describe,it,expect,vi} from 'vitest';
 import {createHash} from 'node:crypto';
 import {configureSDK} from './sdk';
-import {readResource,readImageAsDataURL,loadWorkExportManuscript} from './export-api';
+import {readResource,readImageAsDataURL,listImageAssets,loadWorkExportManuscript} from './export-api';
 import {captureArticle} from '../../article-source';
 import type {ResourceEntry} from 'blc-plugin-sdk';
 const session={context:{workspaceId:'w',workspaceSession:'s',documentId:'draft',editorId:'editor',resource:'文章.md'}};
@@ -31,6 +31,13 @@ describe('SDK export source',()=>{
  });
  it('rejects stalled image transfer instead of hanging',async()=>{
   setup({images:{read:async()=>({chunk:'',hash:'a',total:3})}});await expect(readImageAsDataURL('x')).rejects.toThrow('进展');
+ });
+ it('lists workspace image assets with the current workspace session',async()=>{
+  const list=vi.fn(async()=>({items:[{id:'img1',name:'封面.png',src:'/creation-image/img1.png',width:1200,height:800}],total:1}));
+  setup({images:{list}});
+  const page=await listImageAssets('封面',0,12);
+  expect(page.items[0]).toMatchObject({id:'img1',name:'封面.png',width:1200,height:800});
+  expect(list.mock.calls[0][0]).toMatchObject({workspaceId:'w',workspaceSession:'s',query:'封面',offset:0,limit:12});
  });
  it('reads the captured unsaved draft after the editor closes and across page reloads',async()=>{
   const text='# 草稿\n\n未保存内容😀'.repeat(3000);const bytes=new TextEncoder().encode(text).length;

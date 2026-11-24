@@ -1,6 +1,6 @@
 {
   "name": "blc-export-book",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "private": true,
   "type": "module",
   "description": "大懒猫写作排版导出插件",

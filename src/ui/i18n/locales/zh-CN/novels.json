@@ -376,8 +376,33 @@
       "previewAlt": "封面预览",
       "placeholder": "选择一张封面图片",
       "choose": "选择图片",
+      "libraryChoose": "从素材库选择",
       "remove": "移除",
       "hint": "封面用于 PDF、Word 与 EPUB 的首页；未上传时 PDF 与 EPUB 会按书名生成默认封面，Word 使用扉页。"
+    },
+    "libraryPicker": {
+      "title": "从素材库选择封面",
+      "subtitle": "浏览工作区素材库，选择一张图片作为封面。",
+      "closeAria": "关闭封面选择",
+      "searchAria": "搜索素材库图片",
+      "searchPlaceholder": "搜索图片名称",
+      "libraryTitle": "工作区素材库",
+      "loading": "正在读取…",
+      "totalCount": "{{count}} 张图片",
+      "retry": "重试",
+      "emptySearch": "没有匹配的图片",
+      "empty": "素材库暂无图片",
+      "previewAria": "预览 {{name}}",
+      "readFailed": "图片无法读取",
+      "loadingPreview": "正在加载预览…",
+      "loadMore": "加载更多",
+      "selectedTitle": "已选图片",
+      "selectedAlt": "已选：{{name}}",
+      "sourceLibrary": "工作区素材库",
+      "previewEmpty": "点击图片查看预览",
+      "footerHint": "确认后将替换当前封面。",
+      "cancel": "取消",
+      "useImage": "使用此封面"
     },
     "info": {
       "section": "书籍信息"

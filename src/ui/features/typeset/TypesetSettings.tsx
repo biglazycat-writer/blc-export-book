@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowDown, ArrowUp, FileImage, ImagePlus, RotateCcw, Trash2 } from 'lucide-react'
+import { ArrowDown, ArrowUp, FileImage, ImagePlus, Images, RotateCcw, Trash2 } from 'lucide-react'
 import type { ChapterSummary } from '../../types/models'
 import { formatDisplayDate } from '../../lib/display-date'
+import { ImageLibraryPicker } from '../images/image-library-picker'
+import type { ImageLibraryItem } from '../../bridge/export-api'
 import { applyChapterOrder } from '../novels/work-export/manuscript'
 import type { ScopeTree } from '../novels/work-export/scope-tree'
 import { WorkExportScopePicker } from '../novels/work-export/WorkExportScopePicker'
@@ -38,6 +40,7 @@ export interface TypesetSettingsProps {
   patch: (updater: (current: WorkExportSettings) => WorkExportSettings) => void
   onFormatChange: (format: TypesetFormat) => void
   onCoverFile: (file: File | undefined) => void
+  onPickCoverFromLibrary: (pick: { asset: ImageLibraryItem; dataUrl: string }) => void
   onLogoFile: (file: File | undefined) => void
   onClearCover: () => void
   onClearLogo: () => void
@@ -329,6 +332,7 @@ export function TypesetSettings({
   patch,
   onFormatChange,
   onCoverFile,
+  onPickCoverFromLibrary,
   onLogoFile,
   onClearCover,
   onClearLogo,
@@ -336,6 +340,7 @@ export function TypesetSettings({
   const { t } = useTranslation(['novels', 'common'])
   const coverRef = useRef<HTMLInputElement | null>(null)
   const logoRef = useRef<HTMLInputElement | null>(null)
+  const [libraryOpen, setLibraryOpen] = useState(false)
   const pdfFonts = ['Noto Serif SC']
 
   const layoutTarget: 'pdf' | 'docx' = format === 'docx' ? 'docx' : 'pdf'
@@ -439,12 +444,20 @@ export function TypesetSettings({
                     <button type="button" className="lbBtn" disabled={disabled} onClick={() => coverRef.current?.click()}>
                       <ImagePlus size={14} /> {t('typeset.cover.choose')}
                     </button>
+                    <button type="button" className="lbBtn" disabled={disabled} onClick={() => setLibraryOpen(true)}>
+                      <Images size={14} /> {t('typeset.cover.libraryChoose')}
+                    </button>
                     {settings.branding.coverDataUrl ? (
                       <button type="button" className="lbBtn" disabled={disabled} onClick={onClearCover}>
                         <Trash2 size={14} /> {t('typeset.cover.remove')}
                       </button>
                     ) : null}
                   </div>
+                  <ImageLibraryPicker
+                    open={libraryOpen}
+                    onClose={() => setLibraryOpen(false)}
+                    onPick={onPickCoverFromLibrary}
+                  />
                   <input
                     ref={coverRef}
                     type="file"
