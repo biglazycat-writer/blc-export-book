@@ -1,5 +1,7 @@
 # Typeset Export (blc-export-book)
 
+[简体中文](README.md) | **English**
+
 A BigLazyCat Writer plugin that turns a single article or a whole folder into print-ready, shareable documents.
 
 | Target | Formats |
